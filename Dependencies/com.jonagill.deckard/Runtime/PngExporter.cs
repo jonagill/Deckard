@@ -37,50 +37,47 @@ namespace Deckard
             }
         }
         
-        public static Texture2D RenderCanvas(Canvas canvas)
+        public static Texture2D RenderCanvas(Canvas canvas, int width, int height)
         {
-            var rectTransform = canvas.GetComponent<RectTransform>();
-
-            // Unparent and straighten the transform to make some calculations easier
-            var prevRenderMode = canvas.renderMode;
-            var prevParent = rectTransform.parent;
-            var prevRotation = rectTransform.localRotation;
-            rectTransform.SetParent(null, false);
-            rectTransform.localRotation = Quaternion.identity;
-
             var camera = RenderCamera;
-            
-            var rect = rectTransform.rect;
-            camera.aspect = rect.width / rect.height;
-            camera.orthographicSize = rect.height * .5f;
-            
-            camera.transform.position = rectTransform.position + camera.transform.forward;
-            camera.transform.forward = -rectTransform.forward;
 
+            var renderTexture = RenderTexture.GetTemporary(width, height);
+
+            // Cache off existing data
+            var prevRenderMode = canvas.renderMode;
+            var prevWorldCamera = canvas.worldCamera;
+            var prevTargetTexture = camera.targetTexture;
+            var prevRenderTexture = RenderTexture.active;
+
+            // Configure the canvas and camera
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = camera;
+
+            var aspect = width / (float) height;
+            camera.aspect = aspect;
+            camera.
+            camera.targetTexture = renderTexture;
+            
+            // Perform the render
+            RenderTexture.active = renderTexture;
+            camera.Render();
+            
+            // Copy the data out into the new Texture2D
+            var texture2d = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            texture2d.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            texture2d.Apply();
+            
+            // Restore previous data
             canvas.renderMode = prevRenderMode;
-            rectTransform.SetParent(prevParent, false);
-            rectTransform.localRotation = prevRotation;
+            canvas.worldCamera = prevWorldCamera;
+            camera.ResetAspect();
+            camera.targetTexture = prevTargetTexture;
+            RenderTexture.active = prevRenderTexture;
 
-            return null;
-        }
-
-        [MenuItem("Deckard/Test/Focus camera on current canvas", false)]
-        public static void TestFocusCameraOnCurrentCanvas()
-        {
-            var canvas = Selection.activeGameObject?.GetComponentInParent<Canvas>();
-            if (canvas != null)
-            {
-                RenderCanvas(canvas);
-            }
-        }
-        
-        [MenuItem("Deckard/Test/Focus camera on current canvas", true)]
-        public static bool ValidateTestFocusCameraOnCurrentCanvas()
-        {
-            var selection = Selection.activeGameObject;
-            return selection != null && 
-                   !EditorUtility.IsPersistent(selection) &&
-                   selection.GetComponentInParent<RectTransform>();
+            // Release the render texture
+            RenderTexture.ReleaseTemporary(renderTexture);
+            
+            return texture2d;
         }
     }
 }

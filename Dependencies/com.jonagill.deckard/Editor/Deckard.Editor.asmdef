@@ -1,7 +1,8 @@
 {
     "name": "Deckard.Editor",
-    "references": [],
-    "optionalUnityReferences": [],
+    "references": [
+        "GUID:847980b2aac38544ead8847168c44b2b"
+    ],
     "includePlatforms": [
         "Editor"
     ],
@@ -10,5 +11,6 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": false,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": []
 }
