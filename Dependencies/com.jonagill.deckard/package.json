@@ -1,0 +1,8 @@
+{
+    "name": "com.jonagill.deckard",
+    "description": "A tool for using Unity's UI system to lay out and export card PNGs",
+    "version": "0.0.1",
+    "unity": "2019.2",
+    "displayName": "Deckard",
+    "dependencies": {}
+}
