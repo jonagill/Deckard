@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Deckard
 {
@@ -40,12 +41,14 @@ namespace Deckard
         public static Texture2D RenderCanvas(Canvas canvas, int width, int height)
         {
             var camera = RenderCamera;
-
+            var rectTransform = canvas.GetComponent<RectTransform>();
+            var sizeDelta = rectTransform.sizeDelta;
             var renderTexture = RenderTexture.GetTemporary(width, height);
 
             // Cache off existing data
             var prevRenderMode = canvas.renderMode;
             var prevWorldCamera = canvas.worldCamera;
+            var prevSizeDelta = sizeDelta;
             var prevTargetTexture = camera.targetTexture;
             var prevRenderTexture = RenderTexture.active;
 
@@ -53,9 +56,12 @@ namespace Deckard
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
             canvas.worldCamera = camera;
 
+            // Scale the canvas's width to match the desired aspect ratio for the render
             var aspect = width / (float) height;
-            camera.aspect = aspect;
-            camera.
+            var widthRatio = aspect / camera.aspect;
+            sizeDelta.x *= widthRatio;
+            rectTransform.sizeDelta = sizeDelta;
+            
             camera.targetTexture = renderTexture;
             
             // Perform the render
@@ -70,7 +76,7 @@ namespace Deckard
             // Restore previous data
             canvas.renderMode = prevRenderMode;
             canvas.worldCamera = prevWorldCamera;
-            camera.ResetAspect();
+            rectTransform.sizeDelta = prevSizeDelta;
             camera.targetTexture = prevTargetTexture;
             RenderTexture.active = prevRenderTexture;
 

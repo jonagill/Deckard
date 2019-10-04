@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Deckard.Test
 {
@@ -49,6 +50,10 @@ namespace Deckard.Test
                     GUI.enabled = selectedCanvas != null;
                     if (GUILayout.Button("Render Current Canvas"))
                     {
+                        if (lastRenderedTexture != null)
+                        {
+                            DestroyImmediate(lastRenderedTexture);
+                        }
                         lastRenderedTexture = PngExporter.RenderCanvas(selectedCanvas, renderWidth, renderHeight);
                     }
                     GUI.enabled = true;
