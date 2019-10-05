@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using Object = System.Object;
@@ -18,7 +19,9 @@ namespace Deckard.Test
         private int renderWidth = 310;
         private int renderHeight = 440;
 
-        private Texture lastRenderedTexture;
+        private Texture2D lastRenderedTexture;
+        private string lastSaveDirectory;
+        private string lastSavePath;
 
         private void OnEnable()
         {
@@ -55,6 +58,27 @@ namespace Deckard.Test
                             DestroyImmediate(lastRenderedTexture);
                         }
                         lastRenderedTexture = PngExporter.RenderCanvas(selectedCanvas, renderWidth, renderHeight);
+                        
+                    }
+                    GUI.enabled = true;
+
+                    GUI.enabled = lastRenderedTexture != null;
+                    if (GUILayout.Button("Save Texture"))
+                    {
+                        var path = EditorUtility.SaveFilePanel("Save Image", lastSaveDirectory, "", "png");
+                        if (path != null)
+                        {
+                            lastSaveDirectory = Path.GetDirectoryName(path);
+                            PngExporter.SaveTextureAsPng(lastRenderedTexture, path);
+                            OpenInFileBrowser.Open(path);
+                        }
+                    }
+                    GUI.enabled = true;
+                    
+                    GUI.enabled = !string.IsNullOrEmpty(lastSaveDirectory);
+                    if (GUILayout.Button("Open Directory"))
+                    {
+                        OpenInFileBrowser.Open(lastSaveDirectory);
                     }
                     GUI.enabled = true;
 

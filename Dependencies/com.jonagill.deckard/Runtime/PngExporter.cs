@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
 
 namespace Deckard
@@ -32,18 +34,22 @@ namespace Deckard
                     _renderCamera.orthographic = true;
                     _renderCamera.clearFlags = CameraClearFlags.SolidColor;
                     _renderCamera.backgroundColor = Color.black;
+                    _renderCamera.allowMSAA = false;
                 }
 
                 return _renderCamera;
             }
         }
         
-        public static Texture2D RenderCanvas(Canvas canvas, int width, int height)
+        public static Texture2D RenderCanvas(Canvas canvas, int width, int height, int superSample = 2)
         {
             var camera = RenderCamera;
             var rectTransform = canvas.GetComponent<RectTransform>();
             var sizeDelta = rectTransform.sizeDelta;
-            var renderTexture = RenderTexture.GetTemporary(width, height);
+
+            var renderWidth = width * superSample;
+            var renderHeight = height * superSample;
+            var renderTexture = GetTemporaryRenderTexture(renderWidth, renderHeight);
 
             // Cache off existing data
             var prevRenderMode = canvas.renderMode;
@@ -68,8 +74,13 @@ namespace Deckard
             RenderTexture.active = renderTexture;
             camera.Render();
             
+            // Downsample to the final resolution
+            var blitTexture = GetTemporaryRenderTexture(width, height);
+            Graphics.Blit(renderTexture, blitTexture);
+            
             // Copy the data out into the new Texture2D
             var texture2d = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            RenderTexture.active = blitTexture;
             texture2d.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             texture2d.Apply();
             
@@ -82,8 +93,23 @@ namespace Deckard
 
             // Release the render texture
             RenderTexture.ReleaseTemporary(renderTexture);
+            RenderTexture.ReleaseTemporary(blitTexture);
             
             return texture2d;
         }
+
+        public static void SaveTextureAsPng(Texture2D texture, string path)
+        {
+            byte[] bytes = texture.EncodeToPNG();
+            File.WriteAllBytes(path, bytes);
+        }
+        
+        private static RenderTexture GetTemporaryRenderTexture(int width, int height)
+        {
+            GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, RenderTextureReadWrite.Default);
+            GraphicsFormat compatibleFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, FormatUsage.Render);
+            return RenderTexture.GetTemporary(width, height, 0, compatibleFormat, 1);
+        }
+
     }
 }
