@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
-using Object = System.Object;
 
-namespace Deckard.Test
+namespace Deckard.Editor.Test
 {
     public class DeckardTestWindow : EditorWindow
     {
