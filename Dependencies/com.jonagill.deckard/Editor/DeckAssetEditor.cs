@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
-using Deckard.Parsing;
+using Deckard.Data;
 using EditorGUITable;
 using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace Deckard.Editor

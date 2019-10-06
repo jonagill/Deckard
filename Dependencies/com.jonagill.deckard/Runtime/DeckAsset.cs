@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using Deckard.Parsing;
+using Deckard.Data;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Deckard
 {
@@ -93,6 +90,7 @@ namespace Deckard
         {
             ExportCardImages(path, aspectRatio);
             ExportCsvForDataMerge(path);
+            OpenInFileBrowser.Open(path);
             lastExportPath = path;
         }
         
@@ -128,9 +126,13 @@ namespace Deckard
                         cardName,
                 i / (float) csvSheet.RecordCount);
 
-                    var filePath = Path.Combine(path, cardName + ".png");
+                    var csvBehaviours = cardInstance.GetComponentsInChildren<CsvDataBehaviour>(true);
+                    foreach (var cb in csvBehaviours)
+                    {
+                        cb.Process(csvSheet, i);
+                    }
 
-                    // TODO: setup card prefab properly
+                    var filePath = Path.Combine(path, cardName + ".png");
                     var texture = PngExporter.RenderCanvas(cardInstance, (int) sizePixels.x, (int) sizePixels.y);
                     PngExporter.SaveTextureAsPng(texture, filePath);
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using UnityEngine;
 
-namespace Deckard.Parsing
+namespace Deckard.Data
 {
     [System.Serializable]
     public class CsvSheet

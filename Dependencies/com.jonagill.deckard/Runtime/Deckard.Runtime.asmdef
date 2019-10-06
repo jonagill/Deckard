@@ -1,6 +1,8 @@
 {
     "name": "Deckard.Runtime",
-    "references": [],
+    "references": [
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -8,5 +10,6 @@
     "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }
