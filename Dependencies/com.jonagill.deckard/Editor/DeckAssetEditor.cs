@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -66,6 +67,35 @@ namespace Deckard.Editor
 
                     GUI.enabled = true;
                 }
+                
+                using (new EditorGUILayout.HorizontalScope("box"))
+                {
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("cardPrefab"));
+                }
+                
+                using (new EditorGUILayout.VerticalScope("box"))
+                {
+                    var nameKeyProperty = serializedObject.FindProperty("cardNameKey");
+                    var columnOptions = Target.CsvSheet.Headers.ToArray();
+                    var optionIndex = Array.IndexOf(columnOptions, nameKeyProperty.stringValue);
+                    optionIndex = EditorGUILayout.Popup(
+                        "Name Column",
+                        optionIndex,
+                        columnOptions);
+                    if (optionIndex >= 0)
+                    {
+                        nameKeyProperty.stringValue = columnOptions[optionIndex];
+                    } 
+                    
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("dpi"));
+                    
+                    GUI.enabled = Target.ReadyToExport;
+                    if (GUILayout.Button("Export"))
+                    {
+                        var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
+                        Target.Export(path);
+                    }
+                }
 
                 EditorGUILayout.Space();
 
@@ -75,7 +105,7 @@ namespace Deckard.Editor
                 }
             }
 
-            EditorGUILayout.Space();
+            serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawSheetTable(CsvSheet sheet)
@@ -93,7 +123,7 @@ namespace Deckard.Editor
                 .Select(r =>
                 {
                     return r.Fields
-                        .Select(f => (TableCell) new SelectableLabelCell(f))
+                        .Select(f => (TableCell) new DeckCell(f))
                         .ToList();
                 })
                 .ToList();
@@ -105,7 +135,7 @@ namespace Deckard.Editor
                 GUITableOption.AllowScrollView(true));
         }
 
-        private class SelectableLabelCell : TableCell
+        private class DeckCell : TableCell
         {
             private readonly string value;
 
@@ -118,7 +148,7 @@ namespace Deckard.Editor
 
             public override int CompareTo(object other)
             {
-                var selectableOther = other as SelectableLabelCell;
+                var selectableOther = other as DeckCell;
                 if (selectableOther != null)
                 {
                     if (int.TryParse(value, out var myInt) && int.TryParse(selectableOther.value, out var otherInt))
@@ -135,7 +165,7 @@ namespace Deckard.Editor
                 return base.CompareTo(other);
             }
 
-            public SelectableLabelCell (string value)
+            public DeckCell (string value)
             {
                 this.value = value;
             }

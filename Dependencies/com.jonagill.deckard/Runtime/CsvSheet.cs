@@ -61,6 +61,13 @@ namespace Deckard.Parsing
                             fieldsWithHeaders.Add(fields[j]);
                         }
                     }
+                    
+                    if (fieldsWithHeaders.Count == 0 || fieldsWithHeaders.All(string.IsNullOrWhiteSpace))
+                    {
+                        // Don't add empty rows
+                        continue;
+                    }
+                    
                     sheet.records.Add(new Record(fieldsWithHeaders));
                 }
             }
@@ -83,7 +90,7 @@ namespace Deckard.Parsing
 
             var record = records[recordIndex];
             var fieldIndex = headers.IndexOf(key);
-            if (fieldIndex > 0)
+            if (fieldIndex < 0)
             {
                 Debug.LogWarning($"Failed to find record \"{key}\"");
                 return false;

@@ -12,4 +12,216 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1237c8f0deea7f54aae4a958457385f8, type: 3}
   m_Name: TestDeck
   m_EditorClassIdentifier: 
-  csvRelativePath: 
+  csvPath: Samples/Hop Shots Cards - Player Cards PNP Back.csv
+  pathIsRelative: 1
+  csvSheet:
+    headers:
+    - Name
+    - '@Border'
+    - '@Contents'
+    - Count
+    - Notes
+    records:
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlack.png
+      - HopShotsPlayerCardsResting2.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlack.png
+      - HopShotsPlayerCardsResting1.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlack.png
+      - HopShotsPlayerCardsTurnOrder.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlack.png
+      - HopShotsPlayerCardsResting4.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlack.png
+      - HopShotsPlayerCardsResting3.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlue.png
+      - HopShotsPlayerCardsResting2.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlue.png
+      - HopShotsPlayerCardsResting1.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlue.png
+      - HopShotsPlayerCardsTurnOrder.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlue.png
+      - HopShotsPlayerCardsResting4.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderBlue.png
+      - HopShotsPlayerCardsResting3.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderGreen.png
+      - HopShotsPlayerCardsResting2.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderGreen.png
+      - HopShotsPlayerCardsResting1.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderGreen.png
+      - HopShotsPlayerCardsTurnOrder.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderGreen.png
+      - HopShotsPlayerCardsResting4.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderGreen.png
+      - HopShotsPlayerCardsResting3.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderOrange.png
+      - HopShotsPlayerCardsResting2.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderOrange.png
+      - HopShotsPlayerCardsResting1.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderOrange.png
+      - HopShotsPlayerCardsTurnOrder.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderOrange.png
+      - HopShotsPlayerCardsResting4.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderOrange.png
+      - HopShotsPlayerCardsResting3.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderPurple.png
+      - HopShotsPlayerCardsResting2.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderPurple.png
+      - HopShotsPlayerCardsResting1.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderPurple.png
+      - HopShotsPlayerCardsTurnOrder.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderPurple.png
+      - HopShotsPlayerCardsResting4.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderPurple.png
+      - HopShotsPlayerCardsResting3.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderYellow.png
+      - HopShotsPlayerCardsResting2.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderYellow.png
+      - HopShotsPlayerCardsResting1.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderYellow.png
+      - HopShotsPlayerCardsTurnOrder.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderYellow.png
+      - HopShotsPlayerCardsResting4.png
+      - 1
+      - 
+    - fields:
+      - 
+      - HopShotsPlayerCardsBorderYellow.png
+      - HopShotsPlayerCardsResting3.png
+      - 1
+      - 
+    - fields:
+      - 
+      - 
+      - BugHunterWorm.png
+      - 1
+      - 
+    - fields:
+      - 
+      - 
+      - BugHunterCricket.png
+      - 1
+      - 
+    - fields:
+      - 
+      - 
+      - BugHunterButterfly.png
+      - 1
+      - 
+  cardPrefab: {fileID: 7491420946179574941, guid: b478bd518ba5ab344ab269b3be3a6775,
+    type: 3}
+  lastExportPath: C:/Users/jonagill/Desktop/TestExport
+  cardNameKey: '@Border'
+  dpi: 300
