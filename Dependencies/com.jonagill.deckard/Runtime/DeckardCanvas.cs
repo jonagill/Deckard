@@ -31,7 +31,7 @@ namespace Deckard
                 if (_renderCamera == null)
                 {
                     _renderCamera = new GameObject("DeckardCamera").AddComponent<Camera>();
-                    //_renderCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
+                    _renderCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
                     _renderCamera.orthographic = true;
                     _renderCamera.cullingMask = 1 << RENDER_LAYER;
                     _renderCamera.clearFlags = CameraClearFlags.SolidColor;
@@ -166,8 +166,8 @@ namespace Deckard
             camera.transform.position = transform.position + (transform.forward * -CAMERA_RENDER_DISTANCE); 
             camera.transform.forward = transform.forward;
             
-            // LayoutRebuilder.ForceRebuildLayoutImmediate(RectTransform);
-            // Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(RectTransform);
+            Canvas.ForceUpdateCanvases();
 
             // Perform the render
             RenderTexture.active = renderTexture;
