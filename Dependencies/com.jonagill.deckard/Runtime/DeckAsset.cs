@@ -146,7 +146,7 @@ namespace Deckard
                 EditorUtility.ClearProgressBar();
             }
 
-            //GameObject.DestroyImmediate(cardInstance.gameObject);
+            GameObject.DestroyImmediate(cardInstance.gameObject);
         }
 
         private void ExportCsvForDataMerge(string path)
