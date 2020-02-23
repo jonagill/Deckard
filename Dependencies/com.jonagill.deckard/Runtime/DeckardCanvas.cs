@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -78,22 +79,59 @@ namespace Deckard
         }
 
         [SerializeField] private Vector2 sizeInches = new Vector2(2.5f, 3.5f);
-        [SerializeField] private float renderDpi = 300f;
 
 #if UNITY_EDITOR
 
         private void OnValidate()
         {
-            Canvas.renderMode = RenderMode.WorldSpace;
+            EditorApplication.delayCall += (() =>
+            {
+                if (this == null)
+                {
+                    return;
+                }
 
-            var scaler = GetComponent<CanvasScaler>();
-            EditorApplication.delayCall += (() => DestroyImmediate(scaler));
+                var isDirty = false;
+                
+                if (Canvas.renderMode != RenderMode.WorldSpace)
+                {
+                    Canvas.renderMode = RenderMode.WorldSpace;
+                    isDirty = true;
+                }
+                
+                var scaler = GetComponent<CanvasScaler>();
+                if (scaler)
+                {
+                    DestroyImmediate(scaler);
+                    isDirty = true;
+                }
 
-            RectTransform.sizeDelta = sizeInches * EDIT_DPI;
-            RectTransform.localScale = Vector3.one;
-            RectTransform.pivot = Vector2.one * .5f;
+                var sizeDelta = sizeInches * EDIT_DPI;
+                if (RectTransform.sizeDelta != sizeDelta)
+                {
+                    RectTransform.sizeDelta = sizeDelta;
+                    isDirty = true;
+                }
 
-            EditorUtility.SetDirty(gameObject);
+                var localScale = Vector3.one;
+                if (RectTransform.localScale != localScale)
+                {
+                    RectTransform.localScale = localScale;
+                    isDirty = true;
+                }
+
+                var pivot = Vector2.one * .5f;
+                if (RectTransform.pivot != pivot)
+                {
+                    RectTransform.pivot = pivot;
+                    isDirty = true;
+                }
+
+                if (isDirty)
+                {
+                    EditorUtility.SetDirty(gameObject);
+                }
+            });
         }
 
 #endif
@@ -105,7 +143,7 @@ namespace Deckard
             dt.Add(this, RectTransform, DrivenTransformProperties.All);
         }
         
-        public Texture2D Render(int superSample = 2)
+        public Texture2D Render(int renderDpi, int superSample = 2)
         {
             var camera = RenderCamera;
 

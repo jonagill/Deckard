@@ -14,6 +14,7 @@ namespace Deckard.Editor.Test
             window.Show();
         }
 
+        private int renderDpi = 72;
         private int superSample = 2;
 
         private Texture2D lastRenderedTexture;
@@ -43,6 +44,7 @@ namespace Deckard.Editor.Test
                 {
                     EditorGUILayout.LabelField("Render Tests");
 
+                    renderDpi = EditorGUILayout.IntField("Render DPI", renderDpi);
                     superSample = EditorGUILayout.IntField("Supersample", superSample);
                     
                     var selectedCanvas = Selection.activeGameObject?.GetComponentInParent<DeckardCanvas>();
@@ -55,7 +57,7 @@ namespace Deckard.Editor.Test
                         }
                         
                         
-                        lastRenderedTexture = selectedCanvas.Render(superSample);
+                        lastRenderedTexture = selectedCanvas.Render(renderDpi, superSample);
                     }
                     GUI.enabled = true;
 

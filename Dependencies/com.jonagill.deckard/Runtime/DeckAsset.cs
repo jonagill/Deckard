@@ -137,7 +137,7 @@ namespace Deckard
 
                     var filePath = Path.Combine(path, cardName + ".png");
 
-                    var texture = cardInstance.Render();
+                    var texture = cardInstance.Render(dpi);
                     DeckardCanvas.SaveTextureAsPng(texture, filePath);
                 }
             }

@@ -220,7 +220,7 @@ MonoBehaviour:
       - BugHunterButterfly.png
       - 1
       - 
-  cardPrefab: {fileID: 7491420946179574941, guid: b478bd518ba5ab344ab269b3be3a6775,
+  cardPrefab: {fileID: 8323018441011292592, guid: b478bd518ba5ab344ab269b3be3a6775,
     type: 3}
   lastExportPath: C:/Users/jonagill/Desktop/TestExport
   cardNameKey: '@Border'
