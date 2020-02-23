@@ -6,21 +6,26 @@ namespace Deckard.Data
 {
     public class CsvColor : CsvDataBehaviour
     {
+        private Color prevColor;
+        
         public override void Process(CsvSheet sheet, int index)
         {
             var target = GetComponent<Graphic>();
             if (target != null)
             {
-                if (sheet.TryGetStringValue(key, index, out var value) && 
-                    ColorUtility.TryParseHtmlString(value, out var color))
-                {
-                    target.color = color;
-                }
-                else
-                {
-                    target.color = Color.black;
-                }
+                sheet.TryGetColorValue(key, index, out var value);
+                prevColor = target.color;
+                target.color = value;
             }   
+        }
+
+        public override void Cleanup()
+        {
+            var target = GetComponent<Graphic>();
+            if (target != null)
+            {
+                target.color = prevColor;
+            }
         }
     }
 }

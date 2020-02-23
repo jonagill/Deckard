@@ -8,5 +8,7 @@ namespace Deckard.Data
         protected string key;
 
         public abstract void Process(CsvSheet sheet, int index);
+
+        public abstract void Cleanup();
     }
 }

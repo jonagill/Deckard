@@ -127,6 +127,20 @@ namespace Deckard.Data
 
             return false;
         }
+        
+        public bool TryGetColorValue(string key, int recordIndex, out Color value)
+        {
+            value = Color.magenta;
+            if (TryGetStringValue(key, recordIndex, out var stringValue))
+            {
+                if (ColorUtility.TryParseHtmlString(stringValue, out value))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
     }
 }
