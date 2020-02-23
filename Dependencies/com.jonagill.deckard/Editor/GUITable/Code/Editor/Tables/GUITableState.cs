@@ -50,7 +50,7 @@ namespace EditorGUITable
 		{
 			get
 			{
-				return absoluteColumnSizes.Where((_, i) => columnVisible[i]).Sum(s => s + 4);
+				return absoluteColumnSizes.Where((_, i) => i < columnVisible.Count && columnVisible[i]).Sum(s => s + 4);
 			}
 		}
 
