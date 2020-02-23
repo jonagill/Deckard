@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Deckard.Data;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Deckard
 {
@@ -21,7 +22,7 @@ namespace Deckard
         [SerializeField] private bool pathIsRelative = false;
         [SerializeField] private CsvSheet csvSheet;
 
-        [SerializeField] private Canvas cardPrefab;
+        [SerializeField] private DeckardCanvas cardPrefab;
 
         [SerializeField] private string lastExportPath;
         public string LastExportPath => lastExportPath;
@@ -103,14 +104,15 @@ namespace Deckard
 
             var cardInstance = Instantiate(cardPrefab);
 
-            var sizeDelta = cardInstance.GetComponent<RectTransform>().sizeDelta;
+            var cardTransform = cardInstance.GetComponent<RectTransform>();
+            var size = cardTransform.rect.size;
             if (aspectRatio < 0)
             {
-                aspectRatio = sizeDelta.x / sizeDelta.y;
+                aspectRatio = size.x / size.y;
             }
 
             // Transform from Unity units to inches
-            var sizeInches = sizeDelta / UNITS_PER_INCH;
+            var sizeInches = size / UNITS_PER_INCH;
             
             // Rescale x based on the calculated aspect ratio
             sizeInches.x = sizeInches.y * aspectRatio;
@@ -131,12 +133,12 @@ namespace Deckard
                     {
                         cb.Process(csvSheet, i);
                     }
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(cardTransform);
 
                     var filePath = Path.Combine(path, cardName + ".png");
-                    var texture = PngExporter.RenderCanvas(cardInstance, (int) sizePixels.x, (int) sizePixels.y);
-                    PngExporter.SaveTextureAsPng(texture, filePath);
 
-                    DestroyImmediate(texture);
+                    var texture = cardInstance.Render();
+                    DeckardCanvas.SaveTextureAsPng(texture, filePath);
                 }
             }
             finally
@@ -144,7 +146,7 @@ namespace Deckard
                 EditorUtility.ClearProgressBar();
             }
 
-            GameObject.DestroyImmediate(cardInstance.gameObject);
+            //GameObject.DestroyImmediate(cardInstance.gameObject);
         }
 
         private void ExportCsvForDataMerge(string path)

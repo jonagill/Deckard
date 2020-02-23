@@ -14,8 +14,7 @@ namespace Deckard.Editor.Test
             window.Show();
         }
 
-        private int renderWidth = 310;
-        private int renderHeight = 440;
+        private int superSample = 2;
 
         private Texture2D lastRenderedTexture;
         private string lastSaveDirectory;
@@ -44,10 +43,9 @@ namespace Deckard.Editor.Test
                 {
                     EditorGUILayout.LabelField("Render Tests");
 
-                    renderWidth = EditorGUILayout.IntField("Width", renderWidth);
-                    renderHeight = EditorGUILayout.IntField("Height", renderHeight);
+                    superSample = EditorGUILayout.IntField("Supersample", superSample);
                     
-                    var selectedCanvas = Selection.activeGameObject?.GetComponentInParent<Canvas>();
+                    var selectedCanvas = Selection.activeGameObject?.GetComponentInParent<DeckardCanvas>();
                     GUI.enabled = selectedCanvas != null;
                     if (GUILayout.Button("Render Current Canvas"))
                     {
@@ -55,8 +53,9 @@ namespace Deckard.Editor.Test
                         {
                             DestroyImmediate(lastRenderedTexture);
                         }
-                        lastRenderedTexture = PngExporter.RenderCanvas(selectedCanvas, renderWidth, renderHeight);
                         
+                        
+                        lastRenderedTexture = selectedCanvas.Render(superSample);
                     }
                     GUI.enabled = true;
 
@@ -67,7 +66,7 @@ namespace Deckard.Editor.Test
                         if (path != null)
                         {
                             lastSaveDirectory = Path.GetDirectoryName(path);
-                            PngExporter.SaveTextureAsPng(lastRenderedTexture, path);
+                            DeckardCanvas.SaveTextureAsPng(lastRenderedTexture, path);
                             OpenInFileBrowser.Open(path);
                         }
                     }
