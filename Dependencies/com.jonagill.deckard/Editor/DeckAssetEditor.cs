@@ -51,6 +51,7 @@ namespace Deckard.Editor
                         {
                             Undo.RecordObject(Target, "Set CSV source");
                             Target.SetCsvPath(path);
+                            EditorUtility.SetDirty(Target);
                         }
                     }
 
@@ -59,6 +60,7 @@ namespace Deckard.Editor
                     {
                         Undo.RecordObject(Target, "Refresh CSV source");
                         Target.RefreshCsvSheet();
+                        EditorUtility.SetDirty(Target);
                     }
 
                     GUI.enabled = true;
@@ -89,7 +91,10 @@ namespace Deckard.Editor
                     if (GUILayout.Button("Export"))
                     {
                         var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
-                        Target.Export(path);
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                            Target.Export(path);
+                        }
                     }
                 }
 

@@ -24,8 +24,6 @@ namespace Deckard
 
         [SerializeField] private DeckardCanvas cardPrefab;
 
-        [SerializeField] private string lastExportPath;
-        public string LastExportPath => lastExportPath;
 
         [SerializeField] private string cardNameKey;
         public string CardNameKey => cardNameKey;
@@ -51,6 +49,28 @@ namespace Deckard
                 }
 
                 return string.Empty;
+            }
+        }
+
+        private string ExportPrefName => $"{GetType().Name}_{name}_LastExportPath";
+        public string LastExportPath
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return EditorPrefs.GetString(ExportPrefName, null);
+#else
+                return null;
+#endif
+            }
+
+            set
+            {
+#if UNITY_EDITOR
+                EditorPrefs.SetString(ExportPrefName, value);
+#else
+                throw new InvalidOperationException("Cannot set the deck asset export path in a build.");
+#endif
             }
         }
 
@@ -92,7 +112,7 @@ namespace Deckard
             ExportCardImages(path, aspectRatio);
             ExportCsvForDataMerge(path);
             OpenInFileBrowser.Open(path);
-            lastExportPath = path;
+            LastExportPath = path;
         }
         
         private void ExportCardImages(string path, float aspectRatio = -1)
@@ -139,6 +159,11 @@ namespace Deckard
 
                     var texture = cardInstance.Render(dpi);
                     DeckardCanvas.SaveTextureAsPng(texture, filePath);
+
+                    foreach (var cb in csvBehaviours)
+                    {
+                        cb.Cleanup();
+                    }
                 }
             }
             finally
