@@ -9,7 +9,9 @@ namespace Deckard.Data
         [SerializeField] private SpriteCollection spriteCollection;
 
         private Sprite prevSprite;
-        
+
+        public override PriorityType Priority => PriorityType.Default;
+
         public override void Process(CsvSheet sheet, int index)
         {
             var target = GetComponent<Image>();

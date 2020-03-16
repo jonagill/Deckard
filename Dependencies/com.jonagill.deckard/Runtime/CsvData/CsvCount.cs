@@ -8,6 +8,8 @@ namespace Deckard.Data
     {
         private List<GameObject> spawnedInstances = new List<GameObject>();
         
+        public override PriorityType Priority => PriorityType.PostProcessing;
+        
         public override void Process(CsvSheet sheet, int index)
         {
             if (sheet.TryGetIntValue(key, index, out var value) && 

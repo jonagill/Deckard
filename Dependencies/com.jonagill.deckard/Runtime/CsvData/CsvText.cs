@@ -7,6 +7,8 @@ namespace Deckard.Data
     {
         private string prevText;
         
+        public override PriorityType Priority => PriorityType.Default;
+        
         public override void Process(CsvSheet sheet, int index)
         {
             var target = GetComponent<TextMeshProUGUI>();

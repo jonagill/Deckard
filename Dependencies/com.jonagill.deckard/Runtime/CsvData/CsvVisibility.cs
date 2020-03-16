@@ -23,6 +23,8 @@ namespace Deckard.Data
             LessThanOrEqualTo = 25
         }
 
+        public override PriorityType Priority => PriorityType.Default;
+        
         public VisbilityBehavior Behavior => behavior;
 
         [SerializeField] private VisbilityBehavior behavior = VisbilityBehavior.NotEmpty;

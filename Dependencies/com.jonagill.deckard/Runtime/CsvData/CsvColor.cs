@@ -8,6 +8,8 @@ namespace Deckard.Data
     {
         private Color prevColor;
         
+        public override PriorityType Priority => PriorityType.Default;
+        
         public override void Process(CsvSheet sheet, int index)
         {
             var target = GetComponent<Graphic>();

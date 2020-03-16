@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Deckard.Data;
@@ -146,12 +147,9 @@ namespace Deckard
                         i / (float) csvSheet.RecordCount);
 
                     var csvBehaviours = cardInstance.GetComponentsInChildren<CsvDataBehaviour>(true);
-                    foreach (var cb in csvBehaviours)
+                    foreach (var cb in csvBehaviours.OrderBy(c => c.Priority))
                     {
-                        if (cb != null)
-                        {
-                            cb.Process(csvSheet, i);
-                        }
+                        cb.Process(csvSheet, i);
                     }
 
                     var filePath = Path.Combine(path, cardName + ".png");
@@ -159,7 +157,7 @@ namespace Deckard
                     var texture = cardInstance.Render(dpi);
                     DeckardCanvas.SaveTextureAsPng(texture, filePath);
 
-                    foreach (var cb in csvBehaviours)
+                    foreach (var cb in csvBehaviours.OrderByDescending(c => c.Priority))
                     {
                         if (cb != null)
                         {

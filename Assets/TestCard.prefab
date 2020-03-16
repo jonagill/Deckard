@@ -26,6 +26,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: Name
+--- !u!114 &6634381085710836963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071414336853992033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14913bce22d5e0f48be3279d88398672, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  key: "Notes\r"
+  spriteCollection: {fileID: 11400000, guid: e09e86d653862b84fa3e4e27332d2ea2, type: 2}
 --- !u!1 &6969894314405610086
 GameObject:
   m_ObjectHideFlags: 0
@@ -512,7 +526,6 @@ GameObject:
   - component: {fileID: 7491420946317882000}
   - component: {fileID: 7491420946317882006}
   - component: {fileID: 7491420946317882001}
-  - component: {fileID: 2422529798159261280}
   m_Layer: 31
   m_Name: Background
   m_TagString: Untagged
@@ -576,20 +589,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &2422529798159261280
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7491420946317882003}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14913bce22d5e0f48be3279d88398672, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  key: "Notes\r"
-  spriteCollection: {fileID: 11400000, guid: e09e86d653862b84fa3e4e27332d2ea2, type: 2}
 --- !u!1 &7491420946369914435
 GameObject:
   m_ObjectHideFlags: 0
@@ -1032,6 +1031,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1180210202839019682, guid: b3e49f805d6ebae4fa851e2153a2956d,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b3e49f805d6ebae4fa851e2153a2956d, type: 3}
