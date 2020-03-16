@@ -1,9 +1,6 @@
 {
-    "name": "Deckard.Editor",
-    "references": [
-        "GUID:847980b2aac38544ead8847168c44b2b",
-        "GUID:656f81c66cf91d94aae199cdd40e4c9a"
-    ],
+    "name": "GUITable-Editor",
+    "references": [],
     "includePlatforms": [
         "Editor"
     ],
@@ -11,7 +8,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": false,
+    "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

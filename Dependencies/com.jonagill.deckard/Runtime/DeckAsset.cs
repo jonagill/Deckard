@@ -139,7 +139,10 @@ namespace Deckard
                     var csvBehaviours = cardInstance.GetComponentsInChildren<CsvDataBehaviour>(true);
                     foreach (var cb in csvBehaviours)
                     {
-                        cb.Process(csvSheet, i);
+                        if (cb != null)
+                        {
+                            cb.Process(csvSheet, i);
+                        }
                     }
 
                     var filePath = Path.Combine(path, cardName + ".png");
@@ -149,7 +152,10 @@ namespace Deckard
 
                     foreach (var cb in csvBehaviours)
                     {
-                        cb.Cleanup();
+                        if (cb != null)
+                        {
+                            cb.Cleanup();
+                        }
                     }
                 }
             }
