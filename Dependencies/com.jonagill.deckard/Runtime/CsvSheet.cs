@@ -97,6 +97,13 @@ namespace Deckard.Data
             }
 
             value = record.Fields[fieldIndex];
+
+            if (value != null)
+            {
+                // Remove any trailing whitespace (newlines, etc.)
+                value = value.TrimEnd();
+            }
+            
             return true;
         }
 

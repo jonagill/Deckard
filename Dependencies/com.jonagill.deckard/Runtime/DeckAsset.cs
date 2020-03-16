@@ -52,6 +52,15 @@ namespace Deckard
             }
         }
 
+        public string CsvDirectoryPath
+        {
+            get
+            {
+                var path = CsvAbsolutePath;
+                return Path.GetDirectoryName(CsvAbsolutePath);
+            }
+        }
+
         private string ExportPrefName => $"{GetType().Name}_{name}_LastExportPath";
         public string LastExportPath
         {

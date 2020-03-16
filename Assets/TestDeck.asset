@@ -27,19 +27,19 @@ MonoBehaviour:
       - HopShotsPlayerCardsBorderBlack.png
       - HopShotsPlayerCardsBugPowers.png
       - 1
-      - "\r"
+      - "Cat\r"
     - fields:
       - 
       - HopShotsPlayerCardsBorderBlack.png
       - HopShotsPlayerCardsHop1.png
       - 2
-      - "\r"
+      - "Cat\r"
     - fields:
       - 
       - HopShotsPlayerCardsBorderBlack.png
       - HopShotsPlayerCardsHop2.png
       - 3
-      - "\r"
+      - "Cat\r"
     - fields:
       - 
       - HopShotsPlayerCardsBorderBlack.png
@@ -63,13 +63,13 @@ MonoBehaviour:
       - HopShotsPlayerCardsBorderBlue.png
       - HopShotsPlayerCardsHop1.png
       - 0
-      - "\r"
+      - "Cat\r"
     - fields:
       - 
       - HopShotsPlayerCardsBorderBlue.png
       - HopShotsPlayerCardsHop2.png
       - 0
-      - "\r"
+      - "Cat\r"
     - fields:
       - 
       - HopShotsPlayerCardsBorderBlue.png

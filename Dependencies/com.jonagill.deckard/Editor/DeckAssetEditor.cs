@@ -20,51 +20,71 @@ namespace Deckard.Editor
         {
             using (new EditorGUILayout.VerticalScope())
             {
-                using (new EditorGUILayout.HorizontalScope("box"))
+                using (new EditorGUILayout.VerticalScope("box"))
                 {
-                    EditorGUILayout.LabelField("CSV:", GUILayout.ExpandWidth(false), GUILayout.Width(50));
-
                     var absolutePath = Target.CsvAbsolutePath;
 
                     var hasPath = !string.IsNullOrEmpty(absolutePath);
                     var hasFile = hasPath && File.Exists(absolutePath);
 
                     var displayPath = Target.CsvDisplayPath;
-                    if (!hasPath)
+                    
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        displayPath = "<UNSET>";
-                    }
-                    else if (!hasFile)
-                    {
-                        displayPath = "<MISSING>";
-                    }
-
-                    EditorGUILayout.SelectableLabel(displayPath, GUILayout.Height(EditorGUIUtility.singleLineHeight));
-                    GUILayout.FlexibleSpace();
-                    if (GUILayout.Button(EditorGUIUtility.IconContent("settings"), GUILayout.ExpandWidth(false)))
-                    {
-                        var directory = hasPath
-                            ? Path.GetDirectoryName(absolutePath)
-                            : Application.dataPath;
-
-                        var path = EditorUtility.OpenFilePanel("Select CSV file", directory, "csv");
-                        if (!string.IsNullOrEmpty(path))
+                        EditorGUILayout.LabelField("CSV:", GUILayout.ExpandWidth(false), GUILayout.Width(50));
+                        
+                        if (!hasPath)
                         {
-                            Undo.RecordObject(Target, "Set CSV source");
-                            Target.SetCsvPath(path);
+                            displayPath = "<UNSET>";
+                        }
+                        else if (!hasFile)
+                        {
+                            displayPath = "<MISSING>";
+                        }
+
+                        EditorGUILayout.SelectableLabel(displayPath, GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                    }
+                    
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        GUILayout.FlexibleSpace();
+                        
+                        if (GUILayout.Button(EditorGUIUtility.IconContent("settings"), GUILayout.ExpandWidth(false)))
+                        {
+                            var directory = hasPath
+                                ? Path.GetDirectoryName(absolutePath)
+                                : Application.dataPath;
+
+                            var path = EditorUtility.OpenFilePanel("Select CSV file", directory, "csv");
+                            if (!string.IsNullOrEmpty(path))
+                            {
+                                Undo.RecordObject(Target, "Set CSV source");
+                                Target.SetCsvPath(path);
+                                EditorUtility.SetDirty(Target);
+                            }
+                        }
+
+                        GUI.enabled = hasFile;
+                        if (GUILayout.Button(EditorGUIUtility.IconContent("refresh"), GUILayout.ExpandWidth(false)))
+                        {
+                            Undo.RecordObject(Target, "Refresh CSV source");
+                            Target.RefreshCsvSheet();
                             EditorUtility.SetDirty(Target);
                         }
-                    }
 
-                    GUI.enabled = hasFile;
-                    if (GUILayout.Button(EditorGUIUtility.IconContent("refresh"), GUILayout.ExpandWidth(false)))
-                    {
-                        Undo.RecordObject(Target, "Refresh CSV source");
-                        Target.RefreshCsvSheet();
-                        EditorUtility.SetDirty(Target);
-                    }
+                        if (GUILayout.Button(EditorGUIUtility.IconContent("d_project"), GUILayout.ExpandWidth(false)))
+                        {
+                            UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvDirectoryPath, 0);
+                        }
 
-                    GUI.enabled = true;
+                        
+                        if (GUILayout.Button(EditorGUIUtility.IconContent("d_editicon.sml"), GUILayout.ExpandWidth(false)))
+                        {
+                            UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvAbsolutePath, 0);
+                        }
+
+                        GUI.enabled = true;
+                    }
                 }
                 
                 using (new EditorGUILayout.HorizontalScope("box"))

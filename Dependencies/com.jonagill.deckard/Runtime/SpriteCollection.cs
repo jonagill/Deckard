@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Deckard.Data;
@@ -35,5 +36,11 @@ namespace Deckard
         private EntryList spriteEntries;
 
         public IReadOnlyList<SpriteEntry> SpriteEntries => spriteEntries.BackingList;
+
+        public bool TryGetSpriteForKey(string key, out Sprite sprite)
+        {
+            sprite = SpriteEntries.FirstOrDefault(e => e.Key == key)?.Sprite;
+            return sprite != null;
+        }
     }
 }
