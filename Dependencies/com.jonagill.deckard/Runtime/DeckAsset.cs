@@ -124,19 +124,7 @@ namespace Deckard
 
             var cardInstance = Instantiate(cardPrefab);
 
-            var cardTransform = cardInstance.GetComponent<RectTransform>();
-            var size = cardTransform.rect.size;
-            if (aspectRatio < 0)
-            {
-                aspectRatio = size.x / size.y;
-            }
-
-            // Transform from Unity units to inches
-            var sizeInches = size / UNITS_PER_INCH;
-            
-            // Rescale x based on the calculated aspect ratio
-            sizeInches.x = sizeInches.y * aspectRatio;
-            var sizePixels = sizeInches * dpi;
+            EditorUtility.DisplayProgressBar("Exporting card images...", "", 0f);
 
             try
             {
@@ -146,14 +134,13 @@ namespace Deckard
                     EditorUtility.DisplayProgressBar(
                         "Exporting card images...", 
                         cardName,
-                i / (float) csvSheet.RecordCount);
+                        i / (float) csvSheet.RecordCount);
 
                     var csvBehaviours = cardInstance.GetComponentsInChildren<CsvDataBehaviour>(true);
                     foreach (var cb in csvBehaviours)
                     {
                         cb.Process(csvSheet, i);
                     }
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(cardTransform);
 
                     var filePath = Path.Combine(path, cardName + ".png");
 
@@ -170,7 +157,7 @@ namespace Deckard
             {
                 EditorUtility.ClearProgressBar();
             }
-
+            
             GameObject.DestroyImmediate(cardInstance.gameObject);
         }
 

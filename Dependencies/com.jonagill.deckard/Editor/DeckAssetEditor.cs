@@ -4,6 +4,7 @@ using System.Linq;
 using Deckard.Data;
 using EditorGUITable;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Deckard.Editor
@@ -93,7 +94,18 @@ namespace Deckard.Editor
                         var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
                         if (!string.IsNullOrEmpty(path))
                         {
+                            EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+                            
+                            // Cache out the current scene path because the scene gets torn down when we load a new scene
+                            var prevScene = EditorSceneManager.GetSceneAt(0);
+                            var prevScenePath = prevScene.path;
+
+                            // Load into an empty scene to prevent any possible rendering conflicts
+                            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                            
                             Target.Export(path);
+                            
+                            EditorSceneManager.OpenScene(prevScenePath);
                         }
                     }
                 }

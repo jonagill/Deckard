@@ -349,6 +349,7 @@ GameObject:
   - component: {fileID: 7491420945970171058}
   - component: {fileID: 7491420945970171056}
   - component: {fileID: 7491420945970171059}
+  - component: {fileID: 4355745890703748221}
   m_Layer: 31
   m_Name: Border
   m_TagString: Untagged
@@ -411,6 +412,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4355745890703748221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7491420945970171725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8f182f68fa4f943aadfc97bb6add4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  key: Count
+  behavior: 22
+  stringComparator: 
+  floatComparator: 4
 --- !u!1 &7491420946179574942
 GameObject:
   m_ObjectHideFlags: 0
@@ -891,6 +908,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 434513904731237359}
     m_Modifications:
+    - target: {fileID: 1180210202839019692, guid: b3e49f805d6ebae4fa851e2153a2956d,
+        type: 3}
+      propertyPath: m_Name
+      value: CatImage
+      objectReference: {fileID: 0}
     - target: {fileID: 1180210202839019693, guid: b3e49f805d6ebae4fa851e2153a2956d,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -995,11 +1017,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1180210202839019692, guid: b3e49f805d6ebae4fa851e2153a2956d,
-        type: 3}
-      propertyPath: m_Name
-      value: CatImage
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b3e49f805d6ebae4fa851e2153a2956d, type: 3}
