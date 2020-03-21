@@ -19,15 +19,15 @@ namespace Deckard.Data
             {
                 prevColor = target.color;
                 
-                if (sheet.TryGetColorValue(key, index, out var rawColorValue))
-                {
-                    target.color = rawColorValue;
-                }
-                else if (collection != null && 
+                if (collection != null && 
                          sheet.TryGetStringValue(key, index, out var stringValue) && 
                          collection.TryGetColorForKey(stringValue, out var entryColor))
                 {
                     target.color = entryColor;
+                }
+                else if (sheet.TryGetColorValue(key, index, out var rawColorValue))
+                {
+                    target.color = rawColorValue;
                 }
             }   
         }
