@@ -25,7 +25,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: daf79fefa613e154a92ca5797c314dbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  key: Name
+  key: '@Border'
+  collection: {fileID: 11400000, guid: 9b6b785e380555248861957ff0058630, type: 2}
 --- !u!114 &6634381085710836963
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -352,6 +353,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: '@Contents'
+  collection: {fileID: 0}
 --- !u!1 &7491420945970171725
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,11 +924,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 434513904731237359}
     m_Modifications:
-    - target: {fileID: 1180210202839019692, guid: b3e49f805d6ebae4fa851e2153a2956d,
-        type: 3}
-      propertyPath: m_Name
-      value: CatImage
-      objectReference: {fileID: 0}
     - target: {fileID: 1180210202839019693, guid: b3e49f805d6ebae4fa851e2153a2956d,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1031,6 +1028,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1180210202839019692, guid: b3e49f805d6ebae4fa851e2153a2956d,
+        type: 3}
+      propertyPath: m_Name
+      value: CatImage
       objectReference: {fileID: 0}
     - target: {fileID: 1180210202839019682, guid: b3e49f805d6ebae4fa851e2153a2956d,
         type: 3}

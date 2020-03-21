@@ -6,6 +6,8 @@ namespace Deckard.Data
 {
     public class CsvColor : CsvDataBehaviour
     {
+        [SerializeField] private ColorCollection collection;
+        
         private Color prevColor;
         
         public override PriorityType Priority => PriorityType.Default;
@@ -15,9 +17,18 @@ namespace Deckard.Data
             var target = GetComponent<Graphic>();
             if (target != null)
             {
-                sheet.TryGetColorValue(key, index, out var value);
                 prevColor = target.color;
-                target.color = value;
+                
+                if (sheet.TryGetColorValue(key, index, out var rawColorValue))
+                {
+                    target.color = rawColorValue;
+                }
+                else if (collection != null && 
+                         sheet.TryGetStringValue(key, index, out var stringValue) && 
+                         collection.TryGetColorForKey(stringValue, out var entryColor))
+                {
+                    target.color = entryColor;
+                }
             }   
         }
 

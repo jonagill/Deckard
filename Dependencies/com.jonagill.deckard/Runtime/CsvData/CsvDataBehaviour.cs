@@ -11,7 +11,7 @@ namespace Deckard.Data
             PostProcessing = 10,
         }
         
-        [SerializeField]
+        [SerializeField, HideInInspector]
         protected string key;
         
         public abstract PriorityType Priority { get; }

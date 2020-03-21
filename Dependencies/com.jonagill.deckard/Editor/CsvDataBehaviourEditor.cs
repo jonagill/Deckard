@@ -20,6 +20,10 @@ namespace Deckard.Editor
         
         public override void OnInspectorGUI()
         {
+            base.OnInspectorGUI();
+            
+            EditorGUILayout.Separator();
+            
             if (allKeyOptions == null || filteredKeyOptions == null)
             {
                 RefreshKeyOptions();
