@@ -45,7 +45,7 @@ namespace Deckard.Editor
             
             EditorGUILayout.Separator();
             
-            base.OnInspectorGUI();
+            RenderKeySelectionGUI();
         }
     }
 }

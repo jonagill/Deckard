@@ -21,7 +21,11 @@ namespace Deckard.Editor
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            
+            RenderKeySelectionGUI();
+        }
+
+        protected void RenderKeySelectionGUI()
+        {
             EditorGUILayout.Separator();
             
             if (allKeyOptions == null || filteredKeyOptions == null)
