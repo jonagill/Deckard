@@ -87,9 +87,12 @@ namespace Deckard.Data
             {
                 throw new IndexOutOfRangeException("Invalid record index!");
             }
+            
+            // Remove any preceding or acceding whitespace or case-sensitivity
+            key = key.Trim().ToLowerInvariant();
 
             var record = records[recordIndex];
-            var fieldIndex = headers.IndexOf(key);
+            var fieldIndex = headers.FindIndex(h => h.Trim().ToLowerInvariant() == key);
             if (fieldIndex < 0)
             {
                 Debug.LogWarning($"Failed to find record \"{key}\"");

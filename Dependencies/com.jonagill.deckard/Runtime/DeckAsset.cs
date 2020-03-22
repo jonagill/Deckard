@@ -120,7 +120,6 @@ namespace Deckard
         public void Export(string path, float aspectRatio = -1)
         {
             ExportCardImages(path, aspectRatio);
-            ExportCsvForDataMerge(path);
             OpenInFileBrowser.Open(path);
             LastExportPath = path;
         }
@@ -138,25 +137,32 @@ namespace Deckard
 
             try
             {
-                for (var i = 0; i < csvSheet.RecordCount; i++)
+                for (var recordIndex = 0; recordIndex < csvSheet.RecordCount; recordIndex++)
                 {
-                    var cardName = GetNameForRecord(i, cardNameKey);
-                    EditorUtility.DisplayProgressBar(
-                        "Exporting card images...", 
-                        cardName,
-                        i / (float) csvSheet.RecordCount);
+                    if (!csvSheet.TryGetIntValue("Count", recordIndex, out var count))
+                    {
+                        count = 1;
+                    }
 
                     var csvBehaviours = cardInstance.GetComponentsInChildren<CsvDataBehaviour>(true);
                     foreach (var cb in csvBehaviours.OrderBy(c => c.Priority))
                     {
-                        cb.Process(csvSheet, i);
+                        cb.Process(csvSheet, recordIndex);
                     }
-
-                    var filePath = Path.Combine(path, cardName + ".png");
-
+                    
                     var texture = cardInstance.Render(dpi);
-                    DeckardCanvas.SaveTextureAsPng(texture, filePath);
-
+                    
+                    for (var countIndex = 0; countIndex < count; countIndex++)
+                    {
+                        var cardName = GetNameForRecord(recordIndex, countIndex, cardNameKey);
+                        EditorUtility.DisplayProgressBar(
+                            "Exporting card images...", 
+                            cardName,
+                            recordIndex / (float) csvSheet.RecordCount);
+                        var filePath = Path.Combine(path, cardName + ".png");
+                        DeckardCanvas.SaveTextureAsPng(texture, filePath);
+                    }
+                    
                     foreach (var cb in csvBehaviours.OrderByDescending(c => c.Priority))
                     {
                         if (cb != null)
@@ -173,19 +179,8 @@ namespace Deckard
             
             GameObject.DestroyImmediate(cardInstance.gameObject);
         }
-
-        private void ExportCsvForDataMerge(string path)
-        {
-            for (var i = 0; i < csvSheet.RecordCount; i++)
-            {
-                if (!csvSheet.TryGetIntValue("Count", i, out var count))
-                {
-                    count = 1;
-                }
-            }
-        }
         
-        private string GetNameForRecord(int recordIndex, string nameKey = null)
+        private string GetNameForRecord(int recordIndex, int countIndex, string nameKey = null)
         {
             var sb = INSTANTANEOUS_STRING_BUILDER;
             sb.Clear();
@@ -202,6 +197,12 @@ namespace Deckard
             }
 
             sb.Append("_" + recordIndex);
+
+            if (countIndex > 0)
+            {
+                sb.Append($" ({countIndex + 1})");
+            }
+            
             return sb.ToString();
         }
     }
