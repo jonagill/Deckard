@@ -13,9 +13,6 @@ namespace Deckard
     [CreateAssetMenu(fileName = "New Deck", menuName = "Deckard/New Deck")]
     public class DeckAsset : ScriptableObject
     {
-        // Match points-per-inch used for text layout so that TMP text sizes are correct
-        public const int UNITS_PER_INCH = 72;
-        
         private static readonly Regex NonAlphaNumericRegex = new Regex("[^a-zA-Z0-9 -]", RegexOptions.Compiled);
         private static readonly StringBuilder INSTANTANEOUS_STRING_BUILDER = new StringBuilder();
 
@@ -62,13 +59,21 @@ namespace Deckard
             }
         }
 
+        private string GlobalExportPrefName => $"{GetType().Name}_LastExportPath";
         private string ExportPrefName => $"{GetType().Name}_{name}_LastExportPath";
         public string LastExportPath
         {
             get
             {
 #if UNITY_EDITOR
-                return EditorPrefs.GetString(ExportPrefName, null);
+                var customPath = EditorPrefs.GetString(ExportPrefName, null);
+                if (!string.IsNullOrEmpty(customPath))
+                {
+                    return customPath;
+                }
+
+                // If we've never saved this particular asset, use the last path that any deck saved to
+                return EditorPrefs.GetString(GlobalExportPrefName, null);
 #else
                 return null;
 #endif
@@ -77,6 +82,7 @@ namespace Deckard
             set
             {
 #if UNITY_EDITOR
+                EditorPrefs.SetString(GlobalExportPrefName, value);
                 EditorPrefs.SetString(ExportPrefName, value);
 #else
                 throw new InvalidOperationException("Cannot set the deck asset export path in a build.");

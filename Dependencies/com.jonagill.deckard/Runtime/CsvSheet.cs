@@ -80,7 +80,7 @@ namespace Deckard.Data
         
         public int RecordCount => records.Count;
 
-        public bool TryGetStringValue(string key, int recordIndex, out string value)
+        public bool TryGetStringValue(string key, int recordIndex, out string value, bool logIfMissing = false)
         {
             value = null;
             if (recordIndex < 0 || recordIndex > records.Count)
@@ -95,7 +95,10 @@ namespace Deckard.Data
             var fieldIndex = headers.FindIndex(h => h.Trim().ToLowerInvariant() == key);
             if (fieldIndex < 0)
             {
-                Debug.LogWarning($"Failed to find record \"{key}\"");
+                if (logIfMissing)
+                {
+                    Debug.LogWarning($"Failed to find record \"{key}\"");
+                }
                 return false;
             }
 

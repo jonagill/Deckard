@@ -60,6 +60,7 @@ namespace Deckard.Editor
                             {
                                 Undo.RecordObject(Target, "Set CSV source");
                                 Target.SetCsvPath(path);
+                                serializedObject.Update();
                                 EditorUtility.SetDirty(Target);
                             }
                         }
