@@ -12,6 +12,37 @@ namespace Deckard.Editor
     [CustomEditor(typeof(DeckAsset))]
     public class DeckAssetEditor : UnityEditor.Editor
     {
+        /// <summary>
+        /// Reusable scope that loads into an empty scene to prepare for image rendering and exporting
+        /// </summary>
+        private class EmptySceneScope : IDisposable
+        {
+            private string prevScenePath;
+            
+            public EmptySceneScope()
+            {
+                EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+                            
+                // Cache out the current scene path because the scene gets torn down when we load a new scene
+                var prevScene = EditorSceneManager.GetSceneAt(0);
+                prevScenePath = prevScene.path;
+
+                // Load into an empty scene to prevent any possible rendering conflicts
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            }
+            
+            public void Dispose()
+            {
+                if (prevScenePath == null)
+                {
+                    return;
+                }
+                
+                EditorSceneManager.OpenScene(prevScenePath);
+                prevScenePath = null;
+            }
+        }
+        
         private GUITableState guiTableState;
 
         private DeckAsset Target => (DeckAsset) target;
@@ -88,13 +119,15 @@ namespace Deckard.Editor
                     }
                 }
                 
-                using (new EditorGUILayout.HorizontalScope("box"))
+                using (new EditorGUILayout.VerticalScope("box"))
                 {
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("cardPrefab"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("dpi"));
                 }
                 
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
+                    EditorGUILayout.LabelField("Card Export", EditorStyles.boldLabel);
                     var nameKeyProperty = serializedObject.FindProperty("cardNameKey");
                     var columnOptions = Target.CsvSheet.Headers.ToArray();
                     var optionIndex = Array.IndexOf(columnOptions, nameKeyProperty.stringValue);
@@ -107,30 +140,44 @@ namespace Deckard.Editor
                         nameKeyProperty.stringValue = columnOptions[optionIndex];
                     } 
                     
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("dpi"));
-                    
                     GUI.enabled = Target.ReadyToExport;
-                    if (GUILayout.Button("Export"))
+                    if (GUILayout.Button("Export card files"))
                     {
                         var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
                         if (!string.IsNullOrEmpty(path))
                         {
-                            EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-                            
-                            // Cache out the current scene path because the scene gets torn down when we load a new scene
-                            var prevScene = EditorSceneManager.GetSceneAt(0);
-                            var prevScenePath = prevScene.path;
-
-                            // Load into an empty scene to prevent any possible rendering conflicts
-                            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-                            
-                            Target.Export(path);
-                            
-                            EditorSceneManager.OpenScene(prevScenePath);
+                            using (new EmptySceneScope())
+                            {
+                                Target.ExportCardImages(path);
+                            }
                         }
                     }
+                    GUI.enabled = true;
                 }
 
+                using (new EditorGUILayout.VerticalScope("box"))
+                {
+                    EditorGUILayout.LabelField("Sheet Export", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSizeInches"), new GUIContent("Page Size (inches)"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBleedInches"), new GUIContent("Bleed"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSpacingInches"), new GUIContent("Card Spacing"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetShowCutMarkers"), new GUIContent("Cut Markers"));
+
+                    GUI.enabled = Target.ReadyToExport;
+                    if (GUILayout.Button("Export sheet images"))
+                    {
+                        var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                            using (new EmptySceneScope())
+                            {
+                                Target.ExportSheetImages(path);
+                            }
+                        }
+                    }
+                    GUI.enabled = true;
+                }
+                
                 EditorGUILayout.Space();
 
                 if (Target.CsvSheet.RecordCount > 0)

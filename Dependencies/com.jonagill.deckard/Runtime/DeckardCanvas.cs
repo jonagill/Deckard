@@ -15,13 +15,18 @@ namespace Deckard
     public class DeckardCanvas : MonoBehaviour
     {
         // TextMesh Pro sizing assumes a DPI of 72, so enforce that here
-        public const float EDIT_DPI = 72f;
+        private const float EDIT_DPI = 72f;
 
         private const int RENDER_LAYER = 31;
 
         private const float CAMERA_NEAR_PLANE = .01f;
         private const float CAMERA_FAR_PLANE = .1f;
         private const float CAMERA_RENDER_DISTANCE = .05f;
+
+        public static int InchesToUnits(float inches)
+        {
+            return (int) (inches * EDIT_DPI);
+        }
         
         private Camera _renderCamera;
         private Camera RenderCamera
@@ -80,6 +85,19 @@ namespace Deckard
 
         [SerializeField] private Vector2 sizeInches = new Vector2(2.5f, 3.5f);
 
+        public Vector2 SizeInches
+        {
+            get => sizeInches;
+            set
+            {
+                if (sizeInches != value)
+                {
+                    sizeInches = value;
+                    EnforceCorrectConfiguration();
+                }
+            }
+        }
+
 #if UNITY_EDITOR
 
         private void OnValidate()
@@ -91,41 +109,7 @@ namespace Deckard
                     return;
                 }
 
-                var isDirty = false;
-                
-                if (Canvas.renderMode != RenderMode.WorldSpace)
-                {
-                    Canvas.renderMode = RenderMode.WorldSpace;
-                    isDirty = true;
-                }
-                
-                var scaler = GetComponent<CanvasScaler>();
-                if (scaler)
-                {
-                    DestroyImmediate(scaler);
-                    isDirty = true;
-                }
-
-                var sizeDelta = sizeInches * EDIT_DPI;
-                if (RectTransform.sizeDelta != sizeDelta)
-                {
-                    RectTransform.sizeDelta = sizeDelta;
-                    isDirty = true;
-                }
-
-                var localScale = Vector3.one;
-                if (RectTransform.localScale != localScale)
-                {
-                    RectTransform.localScale = localScale;
-                    isDirty = true;
-                }
-
-                var pivot = Vector2.one * .5f;
-                if (RectTransform.pivot != pivot)
-                {
-                    RectTransform.pivot = pivot;
-                    isDirty = true;
-                }
+                var isDirty = EnforceCorrectConfiguration();
 
                 if (isDirty)
                 {
@@ -214,6 +198,47 @@ namespace Deckard
             {
                 t.gameObject.layer = layer;
             }
+        }
+
+        private bool EnforceCorrectConfiguration()
+        {
+            var isDirty = false;
+                
+            if (Canvas.renderMode != RenderMode.WorldSpace)
+            {
+                Canvas.renderMode = RenderMode.WorldSpace;
+                isDirty = true;
+            }
+                
+            var scaler = GetComponent<CanvasScaler>();
+            if (scaler)
+            {
+                DestroyImmediate(scaler);
+                isDirty = true;
+            }
+
+            var sizeDelta = sizeInches * EDIT_DPI;
+            if (RectTransform.sizeDelta != sizeDelta)
+            {
+                RectTransform.sizeDelta = sizeDelta;
+                isDirty = true;
+            }
+
+            var localScale = Vector3.one;
+            if (RectTransform.localScale != localScale)
+            {
+                RectTransform.localScale = localScale;
+                isDirty = true;
+            }
+
+            var pivot = Vector2.one * .5f;
+            if (RectTransform.pivot != pivot)
+            {
+                RectTransform.pivot = pivot;
+                isDirty = true;
+            }
+
+            return isDirty;
         }
     }
 }
