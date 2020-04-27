@@ -118,9 +118,8 @@ namespace Deckard
                     return globalPath;
                 }
                 
-#else
-                return null;
 #endif
+                return null;
             }
 
             set
