@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace Deckard.Data
@@ -41,10 +42,26 @@ namespace Deckard.Data
             
             var sheet = new CsvSheet();
             
+            // Split on any separators that are not enclosed in quotes
+            Regex splitterRegex = new Regex($"{fieldSeparator}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+            
             var rows = input.Split(rowSeparator);
             for (var i = 0; i < rows.Length; i++)
             {
-                var fields = rows[i].Split(fieldSeparator).ToList();
+                var fields = splitterRegex.Split(rows[i]).ToList();
+                for (var j = 0; j < fields.Count; j++)
+                {
+                    var field = fields[j];
+                    
+                    // Remove any trailing whitespace
+                    field = field.TrimEnd();
+                    
+                    // Remove quotes that might be wrapping the field
+                    field  = field.Trim('\'', '\"', '\t');
+                    
+                    fields[j] = field;
+                }
+                
                 if (i == 0)
                 {
                     // Add all headers so we can refer to them later
@@ -102,14 +119,8 @@ namespace Deckard.Data
                 return false;
             }
 
-            value = record.Fields[fieldIndex];
+            value = record.Fields[fieldIndex]; 
 
-            if (value != null)
-            {
-                // Remove any trailing whitespace (newlines, etc.)
-                value = value.TrimEnd();
-            }
-            
             return true;
         }
 
