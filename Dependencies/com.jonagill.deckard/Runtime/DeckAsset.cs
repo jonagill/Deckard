@@ -57,14 +57,15 @@ namespace Deckard
 
         [SerializeField] private DeckardCanvas cardPrefab;
 
+        [SerializeField] private bool prependCardCounts = true;
+        
         [SerializeField] private Vector2 oneSheetSizeInches = new Vector2(8.5f, 11f);
         [SerializeField] private float oneSheetBleedInches = .125f;
         [SerializeField] private float oneSheetSpacingInches = .125f;
         [SerializeField] private bool oneSheetShowCutMarkers = true;
 
         [SerializeField] private string cardNameKey;
-        public string CardNameKey => cardNameKey;
-        
+        [SerializeField] private string cardNameKey2;
         
         [SerializeField] private int dpi = 300;
         public int DPI => dpi;
@@ -195,23 +196,34 @@ namespace Deckard
             {
                 for (var recordIndex = 0; recordIndex < csvSheet.RecordCount; recordIndex++)
                 {
-                    if (!respectCount || !csvSheet.TryGetIntValue("Count", recordIndex, out var count))
+                    if (!csvSheet.TryGetIntValue("Count", recordIndex, out var sheetCount))
                     {
-                        count = 1;
+                        sheetCount = 1;
                     }
+
+                    var exportCount = respectCount ? sheetCount : 1;
 
                     using (new ApplyCsvBehaviorsScope(cardInstance.gameObject, csvSheet, recordIndex))
                     {
                         var texture = cardInstance.Render(dpi);
 
-                        for (var countIndex = 0; countIndex < count; countIndex++)
+                        for (var countIndex = 0; countIndex < exportCount; countIndex++)
                         {
-                            var cardName = GetNameForRecord(recordIndex, countIndex, cardNameKey);
+                            var cardName = GetNameForRecord(recordIndex, countIndex, cardNameKey, cardNameKey2);
                             EditorUtility.DisplayProgressBar(
                                 "Exporting card images...",
                                 cardName,
                                 recordIndex / (float) csvSheet.RecordCount);
-                            var filePath = Path.Combine(path, cardName + ".png");
+
+                            var fileName = $"{cardName}.png";
+
+                            if (prependCardCounts)
+                            {
+                                // Prepend the count for easy importing into Tabletop Simulator
+                                fileName = $"{sheetCount:00}x " + fileName;
+                            }
+                            
+                            var filePath = Path.Combine(path, fileName);
                             DeckardCanvas.SaveTextureAsPng(texture, filePath);
                         }
                     }
@@ -275,7 +287,7 @@ namespace Deckard
 
                     for (var countIndex = 0; countIndex < count; countIndex++)
                     {
-                        var cardName = GetNameForRecord(recordIndex, countIndex, cardNameKey);
+                        var cardName = GetNameForRecord(recordIndex, countIndex, cardNameKey, cardNameKey2);
                         EditorUtility.DisplayProgressBar(
                             "Configuring card...",
                             cardName,
@@ -317,7 +329,7 @@ namespace Deckard
             GameObject.DestroyImmediate(sheetCanvas.gameObject);
         }
 
-        private string GetNameForRecord(int recordIndex, int countIndex, string nameKey = null)
+        private string GetNameForRecord(int recordIndex, int countIndex, string nameKey = null, string nameKey2 = null)
         {
             var sb = INSTANTANEOUS_STRING_BUILDER;
             sb.Clear();
@@ -330,6 +342,15 @@ namespace Deckard
                 {
                     cardName = NonAlphaNumericRegex.Replace(cardName, "");
                     sb.Append("_" + cardName);
+                }
+            }
+            
+            if (!string.IsNullOrEmpty(nameKey2))
+            {
+                if (csvSheet.TryGetStringValue(nameKey2, recordIndex, out var cardName2))
+                {
+                    cardName2 = NonAlphaNumericRegex.Replace(cardName2, "");
+                    sb.Append("_" + cardName2);
                 }
             }
 

@@ -128,18 +128,52 @@ namespace Deckard.Editor
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
                     EditorGUILayout.LabelField("Card Export", EditorStyles.boldLabel);
-                    var nameKeyProperty = serializedObject.FindProperty("cardNameKey");
-                    var columnOptions = Target.CsvSheet.Headers.ToArray();
-                    var optionIndex = Array.IndexOf(columnOptions, nameKeyProperty.stringValue);
-                    optionIndex = EditorGUILayout.Popup(
-                        "Name Column",
-                        optionIndex,
-                        columnOptions);
-                    if (optionIndex >= 0)
-                    {
-                        nameKeyProperty.stringValue = columnOptions[optionIndex];
-                    } 
                     
+                    var nameKeyProperty = serializedObject.FindProperty("cardNameKey");
+                    var nameKey2Property = serializedObject.FindProperty("cardNameKey2");
+
+                    var columnOptionsList = Target.CsvSheet.Headers.ToList();
+                    columnOptionsList.Insert(0, "<None>");
+                    var columnOptions = columnOptionsList.ToArray();
+                    
+                    var nameOptionIndex = Array.IndexOf(columnOptions, nameKeyProperty.stringValue);
+                    nameOptionIndex = EditorGUILayout.Popup(
+                        "Name Column",
+                        nameOptionIndex,
+                        columnOptions);
+                    
+                    if (nameOptionIndex > 0)
+                    {
+                        nameKeyProperty.stringValue = columnOptions[nameOptionIndex];
+                        
+                        var nameOption2Index = Array.IndexOf(columnOptions, nameKey2Property.stringValue);
+                        nameOption2Index = EditorGUILayout.Popup(
+                            "Name Column 2",
+                            nameOption2Index,
+                            columnOptions);
+
+                        if (nameOption2Index > 0)
+                        {
+                            nameKey2Property.stringValue = columnOptions[nameOption2Index];
+                        }
+                        else
+                        {
+                            nameKey2Property.stringValue = string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        nameKeyProperty.stringValue = string.Empty;
+                        nameKey2Property.stringValue = string.Empty;
+                    }
+                    
+                    var prependCardCountsProperty = serializedObject.FindProperty("prependCardCounts");
+                    prependCardCountsProperty.boolValue = EditorGUILayout.Toggle(
+                        new GUIContent(
+                            "Include Counts",
+                            "Whether to prefix the file names with the card counts. Makes it easier to import the exported files into Tabletop Simulator."),
+                        prependCardCountsProperty.boolValue);
+
                     GUI.enabled = Target.ReadyToExport;
                     if (GUILayout.Button("Export card files"))
                     {
