@@ -10,9 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4c4332e95d1815440b63bbb077776d83, type: 3}
-  m_Name: New Sprite Collection
+  m_Name: Example Sprite Collection
   m_EditorClassIdentifier: 
   spriteEntries:
     array:
-    - Key: Cat
-      Sprite: {fileID: 21300000, guid: a76af344546f74a42a2ebf6e9d738ce8, type: 3}
+    - Key: Club
+      Sprite: {fileID: 21300000, guid: 915c0c3f572b09b4dbf84e841f500f17, type: 3}
+    - Key: Heart
+      Sprite: {fileID: 21300000, guid: cddd7f6697ae8a644a8b87a1320aa062, type: 3}
+    - Key: Spade
+      Sprite: {fileID: 21300000, guid: bbefefaddf087fe48bd5b805baaf1350, type: 3}
+    - Key: Diamond
+      Sprite: {fileID: 21300000, guid: d7e1e2fc6ac9bc4429fb117f367faa77, type: 3}

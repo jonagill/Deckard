@@ -10,217 +10,204 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1237c8f0deea7f54aae4a958457385f8, type: 3}
-  m_Name: TestDeck
+  m_Name: Example Deck
   m_EditorClassIdentifier: 
-  csvPath: Samples/Hop Shots Cards - Player Cards PNP Front.csv
+  csvPath: Examples/ExampleCsv.csv
   pathIsRelative: 1
   csvSheet:
     headers:
-    - Name
-    - '@Border'
-    - '@Contents'
+    - Color
+    - Suit
+    - Value
     - Count
-    - "Notes\r"
     records:
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlack.png
-      - HopShotsPlayerCardsBugPowers.png
+      - Black
+      - Spade
       - 1
-      - "Cat\r"
+      - 1
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlack.png
-      - HopShotsPlayerCardsHop1.png
+      - Black
+      - Spade
       - 2
-      - "Cat\r"
+      - 1
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlack.png
-      - HopShotsPlayerCardsHop2.png
+      - Black
+      - Spade
       - 3
-      - "Cat\r"
+      - 1
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlack.png
-      - HopShotsPlayerCardsHop3.png
+      - Black
+      - Spade
       - 4
-      - "\r"
+      - 1
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlack.png
-      - HopShotsPlayerCardsHop4.png
+      - Black
+      - Spade
       - 5
-      - "\r"
+      - 1
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlue.png
-      - HopShotsPlayerCardsBugPowers.png
+      - Black
+      - Spade
+      - 6
+      - 1
+    - fields:
+      - Black
+      - Spade
+      - 7
+      - 1
+    - fields:
+      - Black
+      - Spade
+      - 8
+      - 1
+    - fields:
+      - Black
+      - Spade
       - 9
-      - "\r"
-    - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlue.png
-      - HopShotsPlayerCardsHop1.png
-      - 0
-      - "Cat\r"
-    - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlue.png
-      - HopShotsPlayerCardsHop2.png
-      - 0
-      - "Cat\r"
-    - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlue.png
-      - HopShotsPlayerCardsHop3.png
-      - 0
-      - "\r"
-    - fields:
-      - 
-      - HopShotsPlayerCardsBorderBlue.png
-      - HopShotsPlayerCardsHop4.png
-      - 0
-      - "\r"
-    - fields:
-      - 
-      - HopShotsPlayerCardsBorderGreen.png
-      - HopShotsPlayerCardsBugPowers.png
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderGreen.png
-      - HopShotsPlayerCardsHop1.png
+      - Black
+      - Club
       - 1
-      - "\r"
+      - 1
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderGreen.png
-      - HopShotsPlayerCardsHop2.png
+      - Black
+      - Club
+      - 2
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderGreen.png
-      - HopShotsPlayerCardsHop3.png
+      - Black
+      - Club
+      - 3
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderGreen.png
-      - HopShotsPlayerCardsHop4.png
+      - Black
+      - Club
+      - 4
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderOrange.png
-      - HopShotsPlayerCardsBugPowers.png
+      - Black
+      - Club
+      - 5
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderOrange.png
-      - HopShotsPlayerCardsHop1.png
+      - Black
+      - Club
+      - 6
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderOrange.png
-      - HopShotsPlayerCardsHop2.png
+      - Black
+      - Club
+      - 7
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderOrange.png
-      - HopShotsPlayerCardsHop3.png
+      - Black
+      - Club
+      - 8
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderOrange.png
-      - HopShotsPlayerCardsHop4.png
+      - Black
+      - Club
+      - 9
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderPurple.png
-      - HopShotsPlayerCardsBugPowers.png
+      - Red
+      - Heart
       - 1
-      - "\r"
+      - 1
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderPurple.png
-      - HopShotsPlayerCardsHop1.png
+      - Red
+      - Heart
+      - 2
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderPurple.png
-      - HopShotsPlayerCardsHop2.png
+      - Red
+      - Heart
+      - 3
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderPurple.png
-      - HopShotsPlayerCardsHop3.png
+      - Red
+      - Heart
+      - 4
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderPurple.png
-      - HopShotsPlayerCardsHop4.png
+      - Red
+      - Heart
+      - 5
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderYellow.png
-      - HopShotsPlayerCardsBugPowers.png
+      - Red
+      - Heart
+      - 6
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderYellow.png
-      - HopShotsPlayerCardsHop1.png
+      - Red
+      - Heart
+      - 7
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderYellow.png
-      - HopShotsPlayerCardsHop2.png
+      - Red
+      - Heart
+      - 8
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderYellow.png
-      - HopShotsPlayerCardsHop3.png
+      - Red
+      - Heart
+      - 9
       - 1
-      - "\r"
     - fields:
-      - 
-      - HopShotsPlayerCardsBorderYellow.png
-      - HopShotsPlayerCardsHop4.png
+      - Red
+      - Diamond
       - 1
-      - "\r"
+      - 1
     - fields:
-      - 
-      - 
-      - BugHunterButterfly.png
+      - Red
+      - Diamond
+      - 2
       - 1
-      - "\r"
     - fields:
-      - 
-      - 
-      - BugHunterCricket.png
+      - Red
+      - Diamond
+      - 3
       - 1
-      - "\r"
     - fields:
-      - 
-      - 
-      - BugHunterWorm.png
+      - Red
+      - Diamond
+      - 4
       - 1
-      - 
+    - fields:
+      - Red
+      - Diamond
+      - 5
+      - 1
+    - fields:
+      - Red
+      - Diamond
+      - 6
+      - 1
+    - fields:
+      - Red
+      - Diamond
+      - 7
+      - 1
+    - fields:
+      - Red
+      - Diamond
+      - 8
+      - 1
+    - fields:
+      - Red
+      - Diamond
+      - 9
+      - 1
   cardPrefab: {fileID: 8323018441011292592, guid: b478bd518ba5ab344ab269b3be3a6775,
     type: 3}
-  cardNameKey: '@Border'
+  prependCardCounts: 1
+  oneSheetSizeInches: {x: 8.5, y: 11}
+  oneSheetBleedInches: 0.125
+  oneSheetSpacingInches: 0.125
+  oneSheetShowCutMarkers: 1
+  cardNameKey: Suit
+  cardNameKey2: Value
   dpi: 300
