@@ -1,10 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Deckard.Data;
-using EditorGUITable;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Deckard.Editor
@@ -12,43 +9,17 @@ namespace Deckard.Editor
     [CustomEditor(typeof(DeckAsset))]
     public class DeckAssetEditor : UnityEditor.Editor
     {
-        /// <summary>
-        /// Reusable scope that loads into an empty scene to prepare for image rendering and exporting
-        /// </summary>
-        private class EmptySceneScope : IDisposable
-        {
-            private string prevScenePath;
-            
-            public EmptySceneScope()
-            {
-                EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-                            
-                // Cache out the current scene path because the scene gets torn down when we load a new scene
-                var prevScene = EditorSceneManager.GetSceneAt(0);
-                prevScenePath = prevScene.path;
-
-                // Load into an empty scene to prevent any possible rendering conflicts
-                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            }
-            
-            public void Dispose()
-            {
-                if (prevScenePath == null)
-                {
-                    return;
-                }
-                
-                EditorSceneManager.OpenScene(prevScenePath);
-                prevScenePath = null;
-            }
-        }
-        
-        private GUITableState guiTableState;
+        private CsvTable csvTable;
 
         private DeckAsset Target => (DeckAsset) target;
 
         public override void OnInspectorGUI()
         {
+            if (csvTable == null)
+            {
+                RefreshTable();
+            }
+            
             using (new EditorGUILayout.VerticalScope())
             {
                 using (new EditorGUILayout.VerticalScope("box"))
@@ -59,11 +30,11 @@ namespace Deckard.Editor
                     var hasFile = hasPath && File.Exists(absolutePath);
 
                     var displayPath = Target.CsvDisplayPath;
-                    
+
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         EditorGUILayout.LabelField("CSV:", GUILayout.ExpandWidth(false), GUILayout.Width(50));
-                        
+
                         if (!hasPath)
                         {
                             displayPath = "<UNSET>";
@@ -73,13 +44,14 @@ namespace Deckard.Editor
                             displayPath = "<MISSING>";
                         }
 
-                        EditorGUILayout.SelectableLabel(displayPath, GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                        EditorGUILayout.SelectableLabel(displayPath,
+                            GUILayout.Height(EditorGUIUtility.singleLineHeight));
                     }
-                    
+
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         GUILayout.FlexibleSpace();
-                        
+
                         if (GUILayout.Button(EditorGUIUtility.IconContent("settings"), GUILayout.ExpandWidth(false)))
                         {
                             var directory = hasPath
@@ -102,15 +74,18 @@ namespace Deckard.Editor
                             Undo.RecordObject(Target, "Refresh CSV source");
                             Target.RefreshCsvSheet();
                             EditorUtility.SetDirty(Target);
+                            RefreshTable();
                         }
 
                         if (GUILayout.Button(EditorGUIUtility.IconContent("d_project"), GUILayout.ExpandWidth(false)))
                         {
-                            UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvDirectoryPath, 0);
+                            UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvDirectoryPath,
+                                0);
                         }
 
-                        
-                        if (GUILayout.Button(EditorGUIUtility.IconContent("d_editicon.sml"), GUILayout.ExpandWidth(false)))
+
+                        if (GUILayout.Button(EditorGUIUtility.IconContent("d_editicon.sml"),
+                            GUILayout.ExpandWidth(false)))
                         {
                             UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvAbsolutePath, 0);
                         }
@@ -118,34 +93,34 @@ namespace Deckard.Editor
                         GUI.enabled = true;
                     }
                 }
-                
+
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("cardPrefab"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("dpi"));
                 }
-                
+
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
                     EditorGUILayout.LabelField("Card Export", EditorStyles.boldLabel);
-                    
+
                     var nameKeyProperty = serializedObject.FindProperty("cardNameKey");
                     var nameKey2Property = serializedObject.FindProperty("cardNameKey2");
 
                     var columnOptionsList = Target.CsvSheet.Headers.ToList();
                     columnOptionsList.Insert(0, "<None>");
                     var columnOptions = columnOptionsList.ToArray();
-                    
+
                     var nameOptionIndex = Array.IndexOf(columnOptions, nameKeyProperty.stringValue);
                     nameOptionIndex = EditorGUILayout.Popup(
                         "Name Column",
                         nameOptionIndex,
                         columnOptions);
-                    
+
                     if (nameOptionIndex > 0)
                     {
                         nameKeyProperty.stringValue = columnOptions[nameOptionIndex];
-                        
+
                         var nameOption2Index = Array.IndexOf(columnOptions, nameKey2Property.stringValue);
                         nameOption2Index = EditorGUILayout.Popup(
                             "Name Column 2",
@@ -166,7 +141,7 @@ namespace Deckard.Editor
                         nameKeyProperty.stringValue = string.Empty;
                         nameKey2Property.stringValue = string.Empty;
                     }
-                    
+
                     var prependCardCountsProperty = serializedObject.FindProperty("prependCardCounts");
                     prependCardCountsProperty.boolValue = EditorGUILayout.Toggle(
                         new GUIContent(
@@ -186,16 +161,21 @@ namespace Deckard.Editor
                             }
                         }
                     }
+
                     GUI.enabled = true;
                 }
 
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
                     EditorGUILayout.LabelField("Sheet Export", EditorStyles.boldLabel);
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSizeInches"), new GUIContent("Page Size (inches)"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBleedInches"), new GUIContent("Bleed"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSpacingInches"), new GUIContent("Card Spacing"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetShowCutMarkers"), new GUIContent("Cut Markers"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSizeInches"),
+                        new GUIContent("Page Size (inches)"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBleedInches"),
+                        new GUIContent("Bleed"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSpacingInches"),
+                        new GUIContent("Card Spacing"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetShowCutMarkers"),
+                        new GUIContent("Cut Markers"));
 
                     GUI.enabled = Target.ReadyToExport;
                     if (GUILayout.Button("Export sheet images"))
@@ -209,81 +189,39 @@ namespace Deckard.Editor
                             }
                         }
                     }
+
                     GUI.enabled = true;
                 }
-                
+
                 EditorGUILayout.Space();
 
                 if (Target.CsvSheet.RecordCount > 0)
                 {
-                    DrawSheetTable(Target.CsvSheet);
+                    DrawTable();
                 }
             }
 
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawSheetTable(CsvSheet sheet)
+        private void RefreshTable()
         {
-            var viewWidth = EditorGUIUtility.currentViewWidth;
-            var columnWidth = viewWidth / sheet.Headers.Count;
-            var columns = sheet.Headers
-                .Select(header => new TableColumn(
-                    TableColumn.Title(header), 
-                    TableColumn.Sortable(true),
-                    TableColumn.Width(columnWidth)))
-                .ToList();
-
-            var rows = sheet.Records
-                .Select(r =>
-                {
-                    return r.Fields
-                        .Select(f => (TableCell) new DeckCell(f))
-                        .ToList();
-                })
-                .ToList();
-
-            guiTableState = GUITableLayout.DrawTable(
-                guiTableState,
-                columns,
-                rows,
-                GUITableOption.AllowScrollView(true));
+            if (Target == null || Target.CsvSheet == null)
+            {
+                return;
+            }
+            
+            csvTable = new CsvTable(Target.CsvSheet);
         }
 
-        private class DeckCell : TableCell
+        private void DrawTable()
         {
-            private readonly string value;
-
-            public override void DrawCell (Rect rect)
+            if (csvTable == null)
             {
-                EditorGUI.SelectableLabel(rect, value);
+                return;
             }
-
-            public override string comparingValue => value;
-
-            public override int CompareTo(object other)
-            {
-                var selectableOther = other as DeckCell;
-                if (selectableOther != null)
-                {
-                    if (int.TryParse(value, out var myInt) && int.TryParse(selectableOther.value, out var otherInt))
-                    {
-                        return myInt.CompareTo(otherInt);
-                    }
-                    
-                    if (float.TryParse(value, out var myFloat) && float.TryParse(selectableOther.value, out var otherFloat))
-                    {
-                        return myFloat.CompareTo(otherFloat);
-                    }
-                }
-
-                return base.CompareTo(other);
-            }
-
-            public DeckCell (string value)
-            {
-                this.value = value;
-            }
+            
+            csvTable.DrawLayout(260);
         }
     }
 }

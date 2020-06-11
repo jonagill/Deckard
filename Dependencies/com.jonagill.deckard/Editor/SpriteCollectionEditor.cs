@@ -1,11 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using Deckard.Data;
-using EditorGUITable;
-using UnityEditor;
-using UnityEditor.SceneManagement;
-using UnityEngine;
+﻿using UnityEditor;
 
 namespace Deckard.Editor
 {

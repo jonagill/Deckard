@@ -18,6 +18,19 @@ namespace Deckard.Data
             private List<string> fields;
             public IReadOnlyList<string> Fields => fields;
 
+            public bool TryGetField(int columnIndex, out string field)
+            {
+                field = null;
+                
+                if (columnIndex < 0 || columnIndex >= fields.Count)
+                {
+                    return false;
+                }
+
+                field = fields[columnIndex];
+                return true;
+            }
+
             public Record(IList<string> fields)
             {
                 this.fields = new List<string>(fields.Count);
