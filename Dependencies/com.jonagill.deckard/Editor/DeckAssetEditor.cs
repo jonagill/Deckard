@@ -65,6 +65,7 @@ namespace Deckard.Editor
                                 Target.SetCsvPath(path);
                                 serializedObject.Update();
                                 EditorUtility.SetDirty(Target);
+                                RefreshTable();
                             }
                         }
 

@@ -18,7 +18,7 @@ namespace Deckard.Editor
         private CsvTreeView _treeView;
 
         public float DesiredWidth => Sheet.Headers.Count * COLUMN_WIDTH;
-        public float DesiredHeight => Sheet.RecordCount * EditorGUIUtility.singleLineHeight;
+        public float DesiredHeight => (Sheet.RecordCount+1.5f) * EditorGUIUtility.singleLineHeight;
 
         public CsvTable(CsvSheet sheet)
         {

@@ -24,7 +24,7 @@ namespace Deckard.Editor
         
         public void Dispose()
         {
-            if (prevScenePath == null)
+            if (string.IsNullOrEmpty(prevScenePath))
             {
                 return;
             }
