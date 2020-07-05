@@ -40,7 +40,7 @@ namespace Deckard
                     _renderCamera.orthographic = true;
                     _renderCamera.cullingMask = 1 << RENDER_LAYER;
                     _renderCamera.clearFlags = CameraClearFlags.SolidColor;
-                    _renderCamera.backgroundColor = Color.black;
+                    _renderCamera.backgroundColor = Color.clear;
                     _renderCamera.allowMSAA = false;
                     _renderCamera.nearClipPlane = CAMERA_NEAR_PLANE;
                     _renderCamera.farClipPlane = CAMERA_FAR_PLANE;
