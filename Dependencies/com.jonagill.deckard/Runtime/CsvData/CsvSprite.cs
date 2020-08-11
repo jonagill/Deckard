@@ -9,6 +9,7 @@ namespace Deckard.Data
         [SerializeField] private SpriteCollection spriteCollection;
 
         private Sprite prevSprite;
+        private bool prevEnabled;
 
         public override PriorityType Priority => PriorityType.Default;
 
@@ -18,14 +19,23 @@ namespace Deckard.Data
             if (target != null)
             {
                 prevSprite = target.sprite;
+                prevEnabled = target.enabled;
                 
                 if (spriteCollection != null)
                 {
-                    if (sheet.TryGetStringValue(key, index, out var spriteKey) &&
-                        spriteCollection.TryGetSpriteForKey(spriteKey, out var sprite))
+                    if (sheet.TryGetStringValue(key, index, out var spriteKey))
                     {
-                        target.sprite = sprite;
+                        if (spriteCollection.TryGetSpriteForKey(spriteKey, out var sprite))
+                        {
+                            target.sprite = sprite;
+                            target.enabled = true;
+                        }
+                        else
+                        {
+                            target.enabled = false;
+                        }
                     }
+                        
                 }
                 else
                 {
@@ -40,6 +50,7 @@ namespace Deckard.Data
             if (target != null)
             {
                 target.sprite = prevSprite;
+                target.enabled = prevEnabled;
             }
         }
     }

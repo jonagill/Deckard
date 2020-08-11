@@ -42,5 +42,14 @@ namespace Deckard
             sprite = SpriteEntries.FirstOrDefault(e => e.Key == key)?.Sprite;
             return sprite != null;
         }
+
+        public void AddSpriteEntry(string key, Sprite sprite)
+        {
+            spriteEntries.Add(new SpriteEntry()
+            {
+                Key = key,
+                Sprite = sprite
+            });
+        }
     }
 }

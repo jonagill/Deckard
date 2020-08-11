@@ -207,7 +207,9 @@ namespace Deckard.Editor
 
         private void RefreshTable()
         {
-            if (Target == null || Target.CsvSheet == null)
+            if (Target == null || 
+                Target.CsvSheet == null || 
+                Target.CsvSheet.Headers.Count == 0)
             {
                 return;
             }
