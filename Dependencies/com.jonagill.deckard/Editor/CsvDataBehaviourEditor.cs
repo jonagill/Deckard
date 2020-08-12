@@ -39,7 +39,8 @@ namespace Deckard.Editor
                     EditorGUILayout.HelpBox($"Key value \"{keyProperty.stringValue}\" is not present in any deck.", MessageType.Error);
                 }
 
-                EditorGUILayout.PropertyField(keyProperty);
+                Undo.RecordObject(Target, "set CSV data key");
+                keyProperty.stringValue = EditorGUILayout.DelayedTextField("Key", keyProperty.stringValue);
                 
                 using (new EditorGUILayout.HorizontalScope())
                 {
