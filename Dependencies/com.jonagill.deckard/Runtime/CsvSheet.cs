@@ -92,7 +92,7 @@ namespace Deckard.Data
                         }
                     }
                     
-                    if (fieldsWithHeaders.Count == 0 || fieldsWithHeaders.All(string.IsNullOrWhiteSpace))
+                    if (fieldsWithHeaders.Count == 0 || fieldsWithHeaders.All(IsEmptyField))
                     {
                         // Don't add empty rows
                         continue;
@@ -107,6 +107,13 @@ namespace Deckard.Data
 
             return sheet;
         }
+        
+        private static bool IsEmptyField(string field)
+        {
+            // Ignore empty and boolean false fields (the default for validated toggle fields)
+            return string.IsNullOrEmpty(field) || field.Equals("FALSE");
+        }
+
         
         public int RecordCount => records.Count;
 
@@ -132,11 +139,11 @@ namespace Deckard.Data
                 return false;
             }
 
-            value = record.Fields[fieldIndex]; 
+            value = record.Fields[fieldIndex];
 
             return true;
         }
-
+        
         public bool TryGetIntValue(string key, int recordIndex, out int value)
         {
             value = 0;
@@ -178,6 +185,5 @@ namespace Deckard.Data
 
             return false;
         }
-
     }
 }
