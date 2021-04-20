@@ -188,7 +188,7 @@ namespace Deckard
         {
             GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(RenderTextureFormat.Default, RenderTextureReadWrite.Default);
             GraphicsFormat compatibleFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, FormatUsage.Render);
-            return RenderTexture.GetTemporary(width, height, 0, compatibleFormat, 1);
+            return RenderTexture.GetTemporary(width, height, 24, compatibleFormat, 1);
         }
 
         private void SetLayerRecursively(int layer)
