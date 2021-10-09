@@ -16,6 +16,7 @@ namespace Deckard.Editor.Test
 
         private int renderDpi = 72;
         private int superSample = 2;
+        private bool includeBleed;
 
         private Texture2D lastRenderedTexture;
         private string lastSaveDirectory;
@@ -46,6 +47,7 @@ namespace Deckard.Editor.Test
 
                     renderDpi = EditorGUILayout.IntField("Render DPI", renderDpi);
                     superSample = EditorGUILayout.IntField("Supersample", superSample);
+                    includeBleed = EditorGUILayout.Toggle("Include Bleed", includeBleed);
                     
                     var selectedCanvas = Selection.activeGameObject?.GetComponentInParent<DeckardCanvas>();
                     GUI.enabled = selectedCanvas != null;
@@ -56,8 +58,7 @@ namespace Deckard.Editor.Test
                             DestroyImmediate(lastRenderedTexture);
                         }
                         
-                        
-                        lastRenderedTexture = selectedCanvas.Render(renderDpi, superSample);
+                        lastRenderedTexture = selectedCanvas.Render(renderDpi, includeBleed, superSample);
                     }
                     GUI.enabled = true;
 

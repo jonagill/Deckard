@@ -149,6 +149,14 @@ namespace Deckard.Editor
                             "Include Counts",
                             "Whether to prefix the file names with the card counts. Makes it easier to import the exported files into Tabletop Simulator."),
                         prependCardCountsProperty.boolValue);
+                    
+                    var includeBleedsProperty = serializedObject.FindProperty("includeBleeds");
+                    var includeBleeds = EditorGUILayout.Toggle(
+                        new GUIContent(
+                            "Include Bleeds",
+                            "Whether to render the bleed area of the card. Important for uploading the cards for print, such as to The Game Crafter."),
+                        includeBleedsProperty.boolValue);
+                    includeBleedsProperty.boolValue = includeBleeds;
 
                     GUI.enabled = Target.ReadyToExport;
                     if (GUILayout.Button("Export card files"))
@@ -158,7 +166,7 @@ namespace Deckard.Editor
                         {
                             using (new EmptySceneScope())
                             {
-                                Target.ExportCardImages(path);
+                                Target.ExportCardImages(path, includeBleeds);
                             }
                         }
                     }
@@ -172,9 +180,9 @@ namespace Deckard.Editor
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSizeInches"),
                         new GUIContent("Page Size (inches)"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBleedInches"),
-                        new GUIContent("Bleed"));
+                        new GUIContent("Page Bleed (inches)"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSpacingInches"),
-                        new GUIContent("Card Spacing"));
+                        new GUIContent("Card Spacing (inches)"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetShowCutMarkers"),
                         new GUIContent("Cut Markers"));
 

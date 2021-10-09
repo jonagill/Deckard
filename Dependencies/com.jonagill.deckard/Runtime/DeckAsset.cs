@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Deckard.Data;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.UI;
 
 namespace Deckard
@@ -58,7 +59,8 @@ namespace Deckard
         [SerializeField] private DeckardCanvas cardPrefab;
 
         [SerializeField] private bool prependCardCounts = true;
-        
+        [SerializeField] private bool includeBleeds = false;
+
         [SerializeField] private Vector2 oneSheetSizeInches = new Vector2(8.5f, 11f);
         [SerializeField] private float oneSheetBleedInches = .125f;
         [SerializeField] private float oneSheetSpacingInches = .125f;
@@ -174,14 +176,14 @@ namespace Deckard
             LastExportPath = path;
         }
 
-        public void ExportCardImages(string path)
+        public void ExportCardImages(string path, bool includeBleed)
         {
-            ExportCardImagesInternal(path, false);
+            ExportCardImagesInternal(path, includeBleed, false);
             OpenInFileBrowser.Open(path);
             LastExportPath = path;
         }
         
-        private void ExportCardImagesInternal(string path, bool respectCount)
+        private void ExportCardImagesInternal(string path, bool includeBleed, bool respectCount)
         {
             if (cardPrefab == null)
             {
@@ -205,7 +207,7 @@ namespace Deckard
 
                     using (new ApplyCsvBehaviorsScope(cardInstance.gameObject, csvSheet, recordIndex))
                     {
-                        var texture = cardInstance.Render(dpi);
+                        var texture = cardInstance.Render(dpi, includeBleed);
 
                         for (var countIndex = 0; countIndex < exportCount; countIndex++)
                         {
@@ -268,7 +270,7 @@ namespace Deckard
                 {
                     sheetIndex++;
                     var filePath = Path.Combine(path, $"{name}_Sheet_{sheetIndex}.png");
-                    var texture = sheetCanvas.Render(dpi);
+                    var texture = sheetCanvas.Render(dpi, includeBleed: true);
                     DeckardCanvas.SaveTextureAsPng(texture, filePath);
 
                     foreach (var behaviourScope in activeBehaviourScopes)
@@ -370,8 +372,10 @@ namespace Deckard
             out List<DeckardCanvas> cardInstances)
         {
             sheetCanvas = new GameObject("SheetInstance").AddComponent<DeckardCanvas>();
-            sheetCanvas.SizeInches = oneSheetSizeInches;
-            
+            sheetCanvas.CardSizeInches = oneSheetSizeInches;
+            sheetCanvas.BleedInches = Vector2.zero; // We will manually configure bleed via padding rather than 
+            sheetCanvas.SafeZoneInches = Vector2.zero;
+
             var sheetBackground = sheetCanvas.gameObject.AddComponent<Image>();
             sheetBackground.color = Color.white;
             
@@ -403,7 +407,7 @@ namespace Deckard
 
                 if (showCutMarkers)
                 {
-                    InstantiateCutMarkers(cardInstance.transform);
+                    InstantiateCutMarkers(cardInstance);
                 }
                 
                 cardInstances.Add(cardInstance);
@@ -412,10 +416,13 @@ namespace Deckard
             LayoutRebuilder.ForceRebuildLayoutImmediate(sheetCanvas.RectTransform);
         }
 
-        private RectTransform InstantiateCutMarkers(Transform root)
+        private void InstantiateCutMarkers(DeckardCanvas cardRoot)
         {
             var cutMarkersPrefab = Resources.Load<RectTransform>("[CutMarkers]");
-            return Instantiate(cutMarkersPrefab, root, false);
+            var cutMarkersInstance = Instantiate(cutMarkersPrefab, cardRoot.transform, false);
+            var cardSizeUnits = DeckardCanvas.InchesToUnits(cardRoot.CardSizeInches);
+            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
+            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
         }
     }
 }

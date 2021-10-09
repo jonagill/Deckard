@@ -6,6 +6,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Deckard
@@ -15,7 +16,7 @@ namespace Deckard
     public class DeckardCanvas : MonoBehaviour
     {
         // TextMesh Pro sizing assumes a DPI of 72, so enforce that here
-        private const float EDIT_DPI = 72f;
+        private const float UNITS_PER_INCH = 72f;
 
         private const int RENDER_LAYER = 31;
 
@@ -25,7 +26,12 @@ namespace Deckard
 
         public static int InchesToUnits(float inches)
         {
-            return (int) (inches * EDIT_DPI);
+            return (int) (inches * UNITS_PER_INCH);
+        }
+
+        public static Vector2 InchesToUnits(Vector2 inches)
+        {
+            return new Vector2(InchesToUnits(inches.x), InchesToUnits(inches.y)); 
         }
         
         private Camera _renderCamera;
@@ -83,42 +89,62 @@ namespace Deckard
             }
         }
 
-        [SerializeField] private Vector2 sizeInches = new Vector2(2.5f, 3.5f);
-
-        public Vector2 SizeInches
+        [FormerlySerializedAs("sizeInches")] [SerializeField] private Vector2 cardSizeInches;
+        /// <summary>
+        /// The desired size of the card, not including bleed
+        /// </summary>
+        public Vector2 CardSizeInches
         {
-            get => sizeInches;
+            get => cardSizeInches;
             set
             {
-                if (sizeInches != value)
+                if (cardSizeInches != value)
                 {
-                    sizeInches = value;
+                    cardSizeInches = value;
+                    EnforceCorrectConfiguration();
+                }
+            }
+        }
+        
+        [SerializeField] private Vector2 bleedInches;
+        /// <summary>
+        /// The amount of bleed that should be rendered when preparing files for printing.
+        /// </summary>
+        public Vector2 BleedInches
+        {
+            get => bleedInches;
+            set
+            {
+                if (bleedInches != value)
+                {
+                    bleedInches = value;
                     EnforceCorrectConfiguration();
                 }
             }
         }
 
-#if UNITY_EDITOR
+        /// <summary>
+        /// The total size of the canvas rendered when preparing files for printing. 
+        /// </summary>
+        public Vector2 TotalPrintSizeInches => cardSizeInches + (bleedInches * 2);
 
-        private void OnValidate()
+        /// <summary>
+        /// The size of the safe zone on the card.
+        /// Critical information should generally not be drawn outside of this
+        /// </summary>
+        [SerializeField] private Vector2 safeZoneInches;
+        public Vector2 SafeZoneInches
         {
-            EditorApplication.delayCall += (() =>
+            get => safeZoneInches;
+            set
             {
-                if (this == null)
+                if (safeZoneInches != value)
                 {
-                    return;
+                    safeZoneInches = value;
+                    EnforceCorrectConfiguration();
                 }
-
-                var isDirty = EnforceCorrectConfiguration();
-
-                if (isDirty)
-                {
-                    EditorUtility.SetDirty(gameObject);
-                }
-            });
+            }
         }
-
-#endif
 
         private void Start()
         {
@@ -127,12 +153,13 @@ namespace Deckard
             dt.Add(this, RectTransform, DrivenTransformProperties.All);
         }
         
-        public Texture2D Render(int renderDpi, int superSample = 2)
+        public Texture2D Render(int renderDpi, bool includeBleed, int superSample = 2)
         {
             var camera = RenderCamera;
 
-            var width = (int) (sizeInches.x * renderDpi);
-            var height = (int) (sizeInches.y * renderDpi);
+            var renderSizeInches = includeBleed ? TotalPrintSizeInches : cardSizeInches;
+            var width = (int) (renderSizeInches.x * renderDpi);
+            var height = (int) (renderSizeInches.y * renderDpi);
             var renderWidth = width * superSample;
             var renderHeight = height * superSample;
             var renderTexture = GetTemporaryRenderTexture(renderWidth, renderHeight);
@@ -143,7 +170,8 @@ namespace Deckard
             SetLayerRecursively(RENDER_LAYER);
 
             camera.aspect = renderWidth / (float) renderHeight;
-            camera.orthographicSize = RectTransform.rect.height / 2f;
+            var heightUnits = renderSizeInches.y * UNITS_PER_INCH;
+            camera.orthographicSize = heightUnits / 2f;
             camera.targetTexture = renderTexture;
 
             // Point the camera at the canvas
@@ -203,7 +231,12 @@ namespace Deckard
         private bool EnforceCorrectConfiguration()
         {
             var isDirty = false;
-                
+            
+            isDirty |= ForceVector2Range(ref cardSizeInches, Vector2.zero, Vector2.positiveInfinity);
+            var halfSize = cardSizeInches * .5f;
+            isDirty |= ForceVector2Range(ref bleedInches, Vector2.zero, halfSize);
+            isDirty |= ForceVector2Range(ref safeZoneInches, Vector2.zero, halfSize - bleedInches);
+            
             if (Canvas.renderMode != RenderMode.WorldSpace)
             {
                 Canvas.renderMode = RenderMode.WorldSpace;
@@ -217,7 +250,7 @@ namespace Deckard
                 isDirty = true;
             }
 
-            var sizeDelta = sizeInches * EDIT_DPI;
+            var sizeDelta = TotalPrintSizeInches * UNITS_PER_INCH;
             if (RectTransform.sizeDelta != sizeDelta)
             {
                 RectTransform.sizeDelta = sizeDelta;
@@ -240,5 +273,88 @@ namespace Deckard
 
             return isDirty;
         }
+
+        private bool ForceVector2Range(ref Vector2 v, Vector2 min, Vector2 max)
+        {
+            Vector2 v2;
+            v2.x = Mathf.Clamp(v.x, min.x, max.x);
+            v2.y = Mathf.Clamp(v.y, min.y, max.y);
+
+            if (v2 != v)
+            {
+                v = v2;
+                return true;
+            }
+
+            return false;
+        }
+        
+        
+#if UNITY_EDITOR
+
+        private void OnDrawGizmos()
+        {
+            if (bleedInches != Vector2.zero)
+            {
+                DrawOutlineGizmo(InchesToUnits(bleedInches), Color.red);
+            }
+
+            if (safeZoneInches != Vector2.zero)
+            {
+                DrawOutlineGizmo(InchesToUnits(bleedInches + safeZoneInches), Color.cyan);
+            }
+        }
+        
+        private void DrawOutlineGizmo(Vector2 cornerOffsetUnits, Color color)
+        {
+            var halfSize = RectTransform.sizeDelta * .5f;
+            var offsetSize = halfSize - cornerOffsetUnits;
+            
+            var corners = new []
+            {
+                new Vector3(-offsetSize.x, +offsetSize.y, 0),
+                new Vector3(+offsetSize.x, +offsetSize.y, 0),
+                new Vector3(+offsetSize.x, -offsetSize.y, 0),
+                new Vector3(-offsetSize.x, -offsetSize.y, 0),
+            };
+
+            Gizmos.matrix = RectTransform.localToWorldMatrix;
+            Gizmos.color = color;
+
+            for (var i = 0; i < corners.Length; i++)
+            {
+                var j = (i + 1) % corners.Length;
+                Gizmos.DrawLine(corners[i], corners[j]);
+            }
+            
+            Gizmos.matrix = Matrix4x4.identity;
+        }
+
+        private void Reset()
+        {
+            // Default to poker card size with standard 1/8" bleed and safe zones
+            cardSizeInches = new Vector2(2.5f, 3.5f);
+            bleedInches = new Vector2(.125f, .125f);
+            safeZoneInches = new Vector2(.125f, .125f);
+        }
+
+        private void OnValidate()
+        {
+            EditorApplication.delayCall += (() =>
+            {
+                if (this == null)
+                {
+                    return;
+                }
+
+                var isDirty = EnforceCorrectConfiguration();
+
+                if (isDirty)
+                {
+                    EditorUtility.SetDirty(gameObject);
+                }
+            });
+        }
+#endif
     }
 }
