@@ -15,11 +15,23 @@ namespace Deckard
     [CreateAssetMenu(fileName = "New Deck", menuName = "Deckard/New Deck")]
     public class DeckAsset : ScriptableObject
     {
-        private class ApplyCsvBehaviorsScope : IDisposable
+        private class ApplyCardBehaviorsScope : IDisposable
         {
-            private IReadOnlyList<CsvDataBehaviour> csvBehaviours;       
-            public ApplyCsvBehaviorsScope(GameObject cardInstance, CsvSheet csvSheet, int recordIndex)
+            private IReadOnlyList<CsvDataBehaviour> csvBehaviours;
+            private IReadOnlyList<ExportBehaviour> exportBehaviours;
+            
+            public ApplyCardBehaviorsScope(
+                GameObject cardInstance, 
+                ExportParams exportParams, 
+                CsvSheet csvSheet, 
+                int recordIndex)
             {
+                exportBehaviours = cardInstance.GetComponentsInChildren<ExportBehaviour>(true);
+                foreach (var eb in exportBehaviours)
+                {
+                    eb.Process(exportParams);
+                }
+                
                 csvBehaviours = cardInstance.GetComponentsInChildren<CsvDataBehaviour>(true);
                 foreach (var cb in csvBehaviours.OrderBy(c => c.Priority))
                 {
@@ -29,20 +41,32 @@ namespace Deckard
             
             public void Dispose()
             {
-                if (csvBehaviours == null)
+                if (exportBehaviours != null)
                 {
-                    return;
-                }
-                
-                foreach (var cb in csvBehaviours.OrderByDescending(c => c.Priority))
-                {
-                    if (cb != null)
+                    foreach (var eb in exportBehaviours)
                     {
-                        cb.Cleanup();
+                        if (eb != null)
+                        {
+                            eb.Cleanup();
+                        }
                     }
+
+                    exportBehaviours = null;
                 }
 
-                csvBehaviours = null;
+                if (csvBehaviours != null)
+                {
+
+                    foreach (var cb in csvBehaviours.OrderByDescending(c => c.Priority))
+                    {
+                        if (cb != null)
+                        {
+                            cb.Cleanup();
+                        }
+                    }
+
+                    csvBehaviours = null;
+                }
             }
         }
         
@@ -190,6 +214,12 @@ namespace Deckard
                 throw new InvalidOperationException("No card prefab specified");
             }
 
+            var exportParams = new ExportParams()
+            {
+                ExportType = ExportType.Cards,
+                IncludeBleeds = includeBleed
+            };
+            
             var cardInstance = Instantiate(cardPrefab);
 
             EditorUtility.DisplayProgressBar("Exporting card images...", "", 0f);
@@ -205,7 +235,7 @@ namespace Deckard
 
                     var exportCount = respectCount ? sheetCount : 1;
 
-                    using (new ApplyCsvBehaviorsScope(cardInstance.gameObject, csvSheet, recordIndex))
+                    using (new ApplyCardBehaviorsScope(cardInstance.gameObject, exportParams, csvSheet, recordIndex))
                     {
                         var texture = cardInstance.Render(dpi, includeBleed);
 
@@ -264,7 +294,13 @@ namespace Deckard
                 var nextCardInstanceIndex = 0;
 
                 var sheetIndex = 0;
-                var activeBehaviourScopes = new List<ApplyCsvBehaviorsScope>();
+                var activeBehaviourScopes = new List<ApplyCardBehaviorsScope>();
+
+                var exportParams = new ExportParams()
+                {
+                    ExportType = ExportType.Sheet,
+                    IncludeBleeds = true,
+                };
                 
                 void ExportSheetAndClearScopes()
                 {
@@ -298,7 +334,7 @@ namespace Deckard
                         var cardInstance = cardInstances[nextCardInstanceIndex];
                         nextCardInstanceIndex++;
                         
-                        activeBehaviourScopes.Add(new ApplyCsvBehaviorsScope(cardInstance.gameObject, csvSheet, recordIndex));
+                        activeBehaviourScopes.Add(new ApplyCardBehaviorsScope(cardInstance.gameObject, exportParams, csvSheet, recordIndex));
                         
                         if (nextCardInstanceIndex >= maxCardsPerPage)
                         {
