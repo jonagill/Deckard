@@ -94,6 +94,8 @@ namespace Deckard.Editor
                     }
                 }
             }
+            
+            EditorUtility.SetDirty(Target);
         }
     }
 }
