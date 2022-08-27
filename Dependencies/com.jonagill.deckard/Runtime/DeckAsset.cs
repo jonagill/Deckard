@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using Deckard.Data;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.UI;
 
 namespace Deckard
@@ -15,6 +14,13 @@ namespace Deckard
     [CreateAssetMenu(fileName = "New Deck", menuName = "Deckard/New Deck")]
     public class DeckAsset : ScriptableObject
     {
+        public enum CardBackBehavior
+        {
+            None,
+            ShowInCorner,
+            SeparateSheets
+        }
+
         private class ApplyCardBehaviorsScope : IDisposable
         {
             private IReadOnlyList<CsvDataBehaviour> csvBehaviours;
@@ -70,17 +76,30 @@ namespace Deckard
             }
         }
         
+        private class TempObjectScope : IDisposable
+        {
+            private GameObject gameObject;
+
+            public TempObjectScope(GameObject gameObject)
+            {
+                this.gameObject = gameObject;
+            }
+
+            public void Dispose()
+            {
+                DestroyImmediate(gameObject);
+            }
+        }
+        
         private static readonly Regex NonAlphaNumericRegex = new Regex("[^a-zA-Z0-9 -]", RegexOptions.Compiled);
         private static readonly StringBuilder INSTANTANEOUS_STRING_BUILDER = new StringBuilder();
-
-        private const int CUT_MARKER_LENGTH_UNITS = 8;
-        private const int CUT_MARKER_WIDTH_UNITS = 1;
 
         [SerializeField] private string csvPath = string.Empty;
         [SerializeField] private bool pathIsRelative = false;
         [SerializeField] private CsvSheet csvSheet;
 
         [SerializeField] private DeckardCanvas cardPrefab;
+        [SerializeField] private Sprite backSprite;
 
         [SerializeField] private bool prependCardCounts = true;
         [SerializeField] private bool includeBleeds = false;
@@ -89,6 +108,10 @@ namespace Deckard
         [SerializeField] private float oneSheetBleedInches = .125f;
         [SerializeField] private float oneSheetSpacingInches = .125f;
         [SerializeField] private bool oneSheetShowCutMarkers = true;
+        [SerializeField] private CardBackBehavior oneSheetBackBehavior = CardBackBehavior.SeparateSheets;
+
+        [SerializeField] private Vector2Int atlasDimensions = new Vector2Int(7, 5);
+        [SerializeField] private CardBackBehavior atlasBackBehavior = CardBackBehavior.ShowInCorner;
 
         [SerializeField] private string cardNameKey;
         [SerializeField] private string cardNameKey2;
@@ -193,16 +216,96 @@ namespace Deckard
             }
         }
 
-        public void ExportSheetImages(string path)
+        public void ExportPrintImages(string path)
         {
-            ExportSheetImagesInternal(path);
+            var backsInCorner = oneSheetBackBehavior == CardBackBehavior.ShowInCorner;
+
+            ExportSheetImagesInternal(
+                path, 
+                "Print_Front", 
+                cardPrefab, 
+                backsInCorner, 
+                GridLayoutGroup.Corner.UpperLeft,
+                TextAnchor.UpperCenter,
+                oneSheetShowCutMarkers,
+                oneSheetSizeInches,
+                oneSheetBleedInches,
+                oneSheetSpacingInches);
+
+            if (oneSheetBackBehavior == CardBackBehavior.SeparateSheets)
+            {
+                var cardBack = InstantiateCardBack(cardPrefab, backSprite);
+                using (new TempObjectScope(cardBack.gameObject))
+                {
+                    ExportSheetImagesInternal(
+                        path,
+                        "Print_Back",
+                        cardBack,
+                        backsInCorner,
+                        GridLayoutGroup.Corner.UpperRight,
+                        TextAnchor.UpperCenter,
+                        oneSheetShowCutMarkers,
+                        oneSheetSizeInches,
+                        oneSheetBleedInches,
+                        oneSheetSpacingInches);
+                }
+            }
+
+            OpenInFileBrowser.Open(path);
+            LastExportPath = path;
+        }
+        
+        public void ExportAtlasImages(string path)
+        {
+            if (cardPrefab == null)
+            {
+                throw new InvalidOperationException("No card prefab specified");
+            }
+
+            var sizeInches = new Vector2(
+                cardPrefab.ContentSizeInches.x * atlasDimensions.x,
+                cardPrefab.ContentSizeInches.y * atlasDimensions.y);
+
+            var backsInCorner = atlasBackBehavior == CardBackBehavior.ShowInCorner;
+            
+            ExportSheetImagesInternal(
+                path, 
+                "Atlas_Front", 
+                cardPrefab, 
+                 backsInCorner,
+                GridLayoutGroup.Corner.UpperLeft,
+                TextAnchor.UpperLeft,
+                false,
+                sizeInches,
+                0f,
+                0f);
+
+            if (atlasBackBehavior == CardBackBehavior.SeparateSheets)
+            {
+                var cardBack = InstantiateCardBack(cardPrefab, backSprite);
+                using (new TempObjectScope(cardBack.gameObject))
+                {
+                    ExportSheetImagesInternal(
+                        path,
+                        "Atlas_Back",
+                        cardBack,
+                        backsInCorner,
+                        GridLayoutGroup.Corner.UpperLeft,
+                        TextAnchor.UpperLeft,
+                        false,
+                        sizeInches,
+                        0,
+                        0);
+                }
+            }
+
             OpenInFileBrowser.Open(path);
             LastExportPath = path;
         }
 
-        public void ExportCardImages(string path, bool includeBleed)
+        public void ExportCardImages(string path)
         {
-            ExportCardImagesInternal(path, includeBleed, false);
+            ExportCardImagesInternal(path, includeBleeds, false);
             OpenInFileBrowser.Open(path);
             LastExportPath = path;
         }
@@ -269,16 +372,40 @@ namespace Deckard
             GameObject.DestroyImmediate(cardInstance.gameObject);
         }
         
-        private void ExportSheetImagesInternal(string path)
+        private void ExportSheetImagesInternal(
+            string path, 
+            string fileLabel,
+            DeckardCanvas cellPrefab,
+            bool showCardBackInCorner,
+            GridLayoutGroup.Corner startCorner,
+            TextAnchor childAlignment,
+            bool showCutMarkers,
+            Vector2 sizeInches,
+            float bleedInches,
+            float spacingInches)
         {
-            if (cardPrefab == null)
+            if (cellPrefab == null)
             {
                 throw new InvalidOperationException("No card prefab specified");
             }
-
-            EditorUtility.DisplayProgressBar("Generating sheet template...", "", 0f);
             
-            GenerateSheetTemplate(oneSheetShowCutMarkers, out var sheetCanvas, out var cardInstances);
+            EditorUtility.DisplayProgressBar("Generating sheet template...", " ", 0f);
+            
+            GenerateGridCanvas(
+                cellPrefab,
+                showCardBackInCorner,
+                backSprite,
+                startCorner,
+                childAlignment,
+                showCutMarkers,
+                sizeInches,
+                bleedInches,
+                spacingInches,
+                out var sheetCanvas,
+                out var cardInstances,
+                out var cardBackInstance,
+                out var spaceFillerInstances
+            );
 
             if (cardInstances.Count == 0)
             {
@@ -286,7 +413,7 @@ namespace Deckard
                 return;
             }
             
-            EditorUtility.DisplayProgressBar("Exporting sheet images...", "", 0f);
+            EditorUtility.DisplayProgressBar("Exporting sheet images...", " ", 0f);
 
             try
             {
@@ -305,7 +432,7 @@ namespace Deckard
                 void ExportSheetAndClearScopes()
                 {
                     sheetIndex++;
-                    var filePath = Path.Combine(path, $"{name}_Sheet_{sheetIndex}.png");
+                    var filePath = Path.Combine(path, $"{name}_{fileLabel}_Sheet_{sheetIndex}.png");
                     var texture = sheetCanvas.Render(dpi, includeBleed: true);
                     DeckardCanvas.SaveTextureAsPng(texture, filePath);
 
@@ -336,6 +463,7 @@ namespace Deckard
                         
                         activeBehaviourScopes.Add(new ApplyCardBehaviorsScope(cardInstance.gameObject, exportParams, csvSheet, recordIndex));
                         
+                        // We've filled up a page -- export it!
                         if (nextCardInstanceIndex >= maxCardsPerPage)
                         {
                             ExportSheetAndClearScopes();
@@ -348,13 +476,20 @@ namespace Deckard
                 // export the sheet one last time
                 if (activeBehaviourScopes.Count > 0)
                 {
+                    var disabledInstances = maxCardsPerPage - nextCardInstanceIndex;
                     // Disable all the card instances that don't have records assigned
                     while (nextCardInstanceIndex < maxCardsPerPage)
                     {
                         cardInstances[nextCardInstanceIndex].gameObject.SetActive(false);
                         nextCardInstanceIndex++;
                     }
-                        
+
+                    for (var i = 0; i < disabledInstances && i < spaceFillerInstances.Count; i++)
+                    {
+                        // Enable filler instances to keep the card back in the bottom corner
+                        spaceFillerInstances[i].SetActive(true);
+                    }
+                    
                     // Export the sheet one last time
                     ExportSheetAndClearScopes();
                 }
@@ -402,13 +537,23 @@ namespace Deckard
             return sb.ToString();
         }
 
-        private void GenerateSheetTemplate(
+        private static void GenerateGridCanvas(
+            DeckardCanvas cellPrefab,
+            bool showCardBackInCorner,
+            Sprite backSprite,
+            GridLayoutGroup.Corner startCorner,
+            TextAnchor childAlignment,
             bool showCutMarkers,
+            Vector2 sizeInches,
+            float bleedInches,
+            float spacingInches,
             out DeckardCanvas sheetCanvas, 
-            out List<DeckardCanvas> cardInstances)
+            out List<DeckardCanvas> cardInstances,
+            out DeckardCanvas cardBackInstance,
+            out List<GameObject> spaceFillerInstances)
         {
             sheetCanvas = new GameObject("SheetInstance").AddComponent<DeckardCanvas>();
-            sheetCanvas.CardSizeInches = oneSheetSizeInches;
+            sheetCanvas.ContentSizeInches = sizeInches;
             sheetCanvas.BleedInches = Vector2.zero; // We will manually configure bleed via padding rather than 
             sheetCanvas.SafeZoneInches = Vector2.zero;
 
@@ -416,16 +561,16 @@ namespace Deckard
             sheetBackground.color = Color.white;
             
             var sheetGrid = sheetCanvas.gameObject.AddComponent<GridLayoutGroup>();
-            var padding = DeckardCanvas.InchesToUnits(oneSheetBleedInches);
-            var spacing = DeckardCanvas.InchesToUnits(oneSheetSpacingInches);
-            var cardSize = cardPrefab.RectTransform.rect.size;
+            var padding = DeckardCanvas.InchesToUnits(bleedInches);
+            var spacing = DeckardCanvas.InchesToUnits(spacingInches);
+            var cardSize = cellPrefab.RectTransform.rect.size;
 
             sheetGrid.cellSize = cardSize;
             sheetGrid.padding = new RectOffset(padding, padding, padding, padding);
             sheetGrid.spacing = Vector2.one * spacing;
-            sheetGrid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            sheetGrid.startCorner = startCorner;
             sheetGrid.startAxis = GridLayoutGroup.Axis.Horizontal;
-            sheetGrid.childAlignment = TextAnchor.UpperCenter;
+            sheetGrid.childAlignment = childAlignment;
 
             cardInstances = new List<DeckardCanvas>();
 
@@ -436,10 +581,14 @@ namespace Deckard
             var maxHorizontalInstances = Mathf.FloorToInt((availableWidth + spacing) / (cardSize.x + spacing));
             var maxVerticalInstances = Mathf.FloorToInt((availableHeight + spacing) / (cardSize.y + spacing));
             var maxTotalInstances = maxHorizontalInstances * maxVerticalInstances;
+            if (showCardBackInCorner)
+            {
+                maxTotalInstances--;
+            }
 
             for (var i = 0; i < maxTotalInstances; i++)
             {
-                var cardInstance = Instantiate(cardPrefab, sheetGrid.transform, false);
+                var cardInstance = Instantiate(cellPrefab, sheetGrid.transform, false);
 
                 if (showCutMarkers)
                 {
@@ -448,17 +597,57 @@ namespace Deckard
                 
                 cardInstances.Add(cardInstance);
             }
-            
+
+            // If we want to put the card back in the corner of the sheet,
+            // add a bunch of disabled filler spaces, then add the card back
+            cardBackInstance = null;
+            spaceFillerInstances = new List<GameObject>();
+            if (showCardBackInCorner)
+            {
+                for (var i = 0; i < maxTotalInstances; i++)
+                {
+                    var filler = InstantiateSpaceFiller(sheetGrid.transform);
+                    spaceFillerInstances.Add(filler);
+                    filler.SetActive(false);
+                }
+                cardBackInstance = InstantiateCardBack(cellPrefab, backSprite, sheetGrid.transform);
+            }
+
             LayoutRebuilder.ForceRebuildLayoutImmediate(sheetCanvas.RectTransform);
         }
 
-        private void InstantiateCutMarkers(DeckardCanvas cardRoot)
+        private static RectTransform InstantiateCutMarkers(DeckardCanvas cardRoot)
         {
             var cutMarkersPrefab = Resources.Load<RectTransform>("[CutMarkers]");
             var cutMarkersInstance = Instantiate(cutMarkersPrefab, cardRoot.transform, false);
-            var cardSizeUnits = DeckardCanvas.InchesToUnits(cardRoot.CardSizeInches);
+            var cardSizeUnits = DeckardCanvas.InchesToUnits(cardRoot.ContentSizeInches);
             cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
             cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
+            return cutMarkersInstance;
+        }
+
+        private static DeckardCanvas InstantiateCardBack(DeckardCanvas cardPrefab, Sprite backSprite, Transform root = null)
+        {
+            if (cardPrefab == null) return null;
+            var backPrefab = new GameObject("CardBack", typeof(Canvas));
+            backPrefab.transform.SetParent(root, false);
+            
+            var canvas = backPrefab.AddComponent<DeckardCanvas>();
+            canvas.ContentSizeInches = cardPrefab.ContentSizeInches;
+            canvas.BleedInches = cardPrefab.BleedInches;
+            
+            var graphic = backPrefab.gameObject.AddComponent<Image>();
+            graphic.sprite = backSprite;
+            graphic.type = Image.Type.Filled;
+
+            return canvas;
+        }
+
+        private static GameObject InstantiateSpaceFiller(Transform parent)
+        {
+            var filler = new GameObject("Filler", typeof(RectTransform));
+            filler.transform.SetParent(parent);
+            return filler;
         }
     }
 }

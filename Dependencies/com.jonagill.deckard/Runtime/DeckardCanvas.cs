@@ -89,18 +89,20 @@ namespace Deckard
             }
         }
 
-        [FormerlySerializedAs("sizeInches")] [SerializeField] private Vector2 cardSizeInches;
+        [FormerlySerializedAs("sizeInches")]
+        [FormerlySerializedAs("contentSizeInches")]
+        [SerializeField] private Vector2 contentSizeInches;
         /// <summary>
         /// The desired size of the card, not including bleed
         /// </summary>
-        public Vector2 CardSizeInches
+        public Vector2 ContentSizeInches
         {
-            get => cardSizeInches;
+            get => contentSizeInches;
             set
             {
-                if (cardSizeInches != value)
+                if (contentSizeInches != value)
                 {
-                    cardSizeInches = value;
+                    contentSizeInches = value;
                     EnforceCorrectConfiguration();
                 }
             }
@@ -126,7 +128,7 @@ namespace Deckard
         /// <summary>
         /// The total size of the canvas rendered when preparing files for printing. 
         /// </summary>
-        public Vector2 TotalPrintSizeInches => cardSizeInches + (bleedInches * 2);
+        public Vector2 TotalPrintSizeInches => contentSizeInches + (bleedInches * 2);
 
         /// <summary>
         /// The size of the safe zone on the card.
@@ -157,7 +159,7 @@ namespace Deckard
         {
             var camera = RenderCamera;
 
-            var renderSizeInches = includeBleed ? TotalPrintSizeInches : cardSizeInches;
+            var renderSizeInches = includeBleed ? TotalPrintSizeInches : contentSizeInches;
             var width = (int) (renderSizeInches.x * renderDpi);
             var height = (int) (renderSizeInches.y * renderDpi);
             var renderWidth = width * superSample;
@@ -232,8 +234,8 @@ namespace Deckard
         {
             var isDirty = false;
             
-            isDirty |= ForceVector2Range(ref cardSizeInches, Vector2.zero, Vector2.positiveInfinity);
-            var halfSize = cardSizeInches * .5f;
+            isDirty |= ForceVector2Range(ref contentSizeInches, Vector2.zero, Vector2.positiveInfinity);
+            var halfSize = contentSizeInches * .5f;
             isDirty |= ForceVector2Range(ref bleedInches, Vector2.zero, halfSize);
             isDirty |= ForceVector2Range(ref safeZoneInches, Vector2.zero, halfSize - bleedInches);
             
@@ -333,7 +335,7 @@ namespace Deckard
         private void Reset()
         {
             // Default to poker card size with standard 1/8" bleed and safe zones
-            cardSizeInches = new Vector2(2.5f, 3.5f);
+            contentSizeInches = new Vector2(2.5f, 3.5f);
             bleedInches = new Vector2(.125f, .125f);
             safeZoneInches = new Vector2(.125f, .125f);
         }
