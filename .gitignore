@@ -58,3 +58,5 @@ ExportedObj/
 
 # AG Build File
 *.bld
+Logs
+UserSettings
