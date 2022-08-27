@@ -2,7 +2,7 @@
 
 namespace Deckard.Data
 {
-    public abstract class EnableToggleBassBehaviour : ExportBehaviour
+    public abstract class EnableToggleBaseBehaviour : ExportBehaviour
     {
         [SerializeField] private Behaviour[] targetComponents;
         private bool[] prevEnabled;

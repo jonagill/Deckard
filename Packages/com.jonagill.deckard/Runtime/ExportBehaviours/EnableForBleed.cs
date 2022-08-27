@@ -2,7 +2,7 @@
 
 namespace Deckard.Data
 {
-    public class EnableForBleed : EnableToggleBassBehaviour
+    public class EnableForBleed : EnableToggleBaseBehaviour
     {
         [SerializeField] private bool enabledForBleeds;
         

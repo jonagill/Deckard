@@ -2,7 +2,7 @@
 
 namespace Deckard.Data
 {
-    public class EnableForExportType : EnableToggleBassBehaviour
+    public class EnableForExportType : EnableToggleBaseBehaviour
     {
         [SerializeField] private ExportType exportType;
         

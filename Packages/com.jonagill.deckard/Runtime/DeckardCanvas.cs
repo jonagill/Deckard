@@ -91,7 +91,8 @@ namespace Deckard
 
         [FormerlySerializedAs("sizeInches")]
         [FormerlySerializedAs("contentSizeInches")]
-        [SerializeField] private Vector2 contentSizeInches;
+        [SerializeField, Tooltip("The desired size of the final printed card")] 
+        private Vector2 contentSizeInches;
         /// <summary>
         /// The desired size of the card, not including bleed
         /// </summary>
@@ -108,7 +109,8 @@ namespace Deckard
             }
         }
         
-        [SerializeField] private Vector2 bleedInches;
+        [SerializeField, Tooltip("The size of the bleed, the area outside of the card that is printed to ensure that the colors extend all the way to the edges after cutting out the card.")] 
+        private Vector2 bleedInches;
         /// <summary>
         /// The amount of bleed that should be rendered when preparing files for printing.
         /// </summary>
@@ -134,7 +136,8 @@ namespace Deckard
         /// The size of the safe zone on the card.
         /// Critical information should generally not be drawn outside of this
         /// </summary>
-        [SerializeField] private Vector2 safeZoneInches;
+        [SerializeField, Tooltip("How far from the edge of the card the 'safe zone' begins. Any information drawn outside of this area is at risk of being sliced off if the card is cut at all inaccurately after printing.")] 
+        private Vector2 safeZoneInches;
         public Vector2 SafeZoneInches
         {
             get => safeZoneInches;

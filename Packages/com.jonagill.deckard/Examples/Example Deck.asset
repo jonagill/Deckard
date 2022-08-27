@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1237c8f0deea7f54aae4a958457385f8, type: 3}
   m_Name: Example Deck
   m_EditorClassIdentifier: 
-  csvPath: Examples/ExampleCsv.csv
-  pathIsRelative: 1
+  csvPath: /Users/jonagill/Git/Deckard/Packages/com.jonagill.deckard/Examples/ExampleCsv.csv
+  pathIsRelative: 0
   csvSheet:
     headers:
     - Color
@@ -203,11 +203,16 @@ MonoBehaviour:
       - 1
   cardPrefab: {fileID: 8323018441011292592, guid: b478bd518ba5ab344ab269b3be3a6775,
     type: 3}
+  backSprite: {fileID: 0}
   prependCardCounts: 1
+  includeBleeds: 0
   oneSheetSizeInches: {x: 8.5, y: 11}
   oneSheetBleedInches: 0.125
   oneSheetSpacingInches: 0.125
   oneSheetShowCutMarkers: 1
+  oneSheetBackBehavior: 2
+  atlasDimensions: {x: 7, y: 5}
+  atlasBackBehavior: 1
   cardNameKey: Suit
   cardNameKey2: Value
   dpi: 300

@@ -119,8 +119,14 @@ namespace Deckard.Data
             LessThanOrEqualTo = 25
         }
 
+        public enum MultipleConditionsBehavior
+        {
+            Any,
+            All
+        }
+
         public override PriorityType Priority => PriorityType.Default;
-        
+
         [SerializeField] private VisibilityCondition[] conditions = new []
         {
             new VisibilityCondition()
@@ -129,19 +135,36 @@ namespace Deckard.Data
             } 
         };
 
+        [SerializeField]
+        private MultipleConditionsBehavior multipleConditionsBehavior = MultipleConditionsBehavior.Any;
+
         private bool wasVisible;
         
         public override void Process(CsvSheet sheet, int index)
         {
             wasVisible = gameObject.activeSelf;
 
-            var visible = false;
-            foreach (var condition in conditions)
+            if (multipleConditionsBehavior == MultipleConditionsBehavior.Any)
             {
-                visible |= condition.ShouldBeVisible(sheet, index, key);
+                var visible = false;
+                foreach (var condition in conditions)
+                {
+                    visible |= condition.ShouldBeVisible(sheet, index, key);
+                }
+
+                SetVisible(visible);
+            }
+            else
+            {
+                var visible = true;
+                foreach (var condition in conditions)
+                {
+                    visible &= condition.ShouldBeVisible(sheet, index, key);
+                }
+
+                SetVisible(visible);
             }
 
-            SetVisible(visible);
         }
 
         public override void Cleanup()
