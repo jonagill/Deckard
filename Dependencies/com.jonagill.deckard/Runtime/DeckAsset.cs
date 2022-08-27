@@ -101,7 +101,7 @@ namespace Deckard
         [SerializeField] private DeckardCanvas cardPrefab;
         [SerializeField] private Sprite backSprite;
 
-        [SerializeField] private bool prependCardCounts = true;
+        [SerializeField] private bool prependCardCounts = false;
         [SerializeField] private bool includeBleeds = false;
 
         [SerializeField] private Vector2 oneSheetSizeInches = new Vector2(8.5f, 11f);

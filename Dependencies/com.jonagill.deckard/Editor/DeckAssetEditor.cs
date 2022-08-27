@@ -52,7 +52,9 @@ namespace Deckard.Editor
                     {
                         GUILayout.FlexibleSpace();
 
-                        if (GUILayout.Button(EditorGUIUtility.IconContent("settings"), GUILayout.ExpandWidth(false)))
+                        var settingsIcon = EditorGUIUtility.IconContent("settings");
+                        settingsIcon.tooltip = "Select a CSV file to use as the source data for this deck";
+                        if (GUILayout.Button(settingsIcon, GUILayout.ExpandWidth(false)))
                         {
                             var directory = hasPath
                                 ? Path.GetDirectoryName(absolutePath)
@@ -69,43 +71,48 @@ namespace Deckard.Editor
                             }
                         }
 
-                        GUI.enabled = hasFile;
-                        if (GUILayout.Button(EditorGUIUtility.IconContent("refresh"), GUILayout.ExpandWidth(false)))
+                        using (new EditorGUI.DisabledScope(!hasFile))
                         {
-                            Undo.RecordObject(Target, "Refresh CSV source");
-                            Target.RefreshCsvSheet();
-                            EditorUtility.SetDirty(Target);
-                            RefreshTable();
-                        }
+                            var refreshIcon = EditorGUIUtility.IconContent("refresh");
+                            refreshIcon.tooltip = "Refresh the deck asset with the latest data from the CSV file";
+                            if (GUILayout.Button(refreshIcon, GUILayout.ExpandWidth(false)))
+                            {
+                                Undo.RecordObject(Target, "Refresh CSV source");
+                                Target.RefreshCsvSheet();
+                                EditorUtility.SetDirty(Target);
+                                RefreshTable();
+                            }
 
-                        if (GUILayout.Button(EditorGUIUtility.IconContent("d_project"), GUILayout.ExpandWidth(false)))
-                        {
-                            UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvDirectoryPath,
+                            var folderIcon = EditorGUIUtility.IconContent("d_project");
+                            folderIcon.tooltip = "Reveal the CSV file in the file explorer";
+                            if (GUILayout.Button(folderIcon, GUILayout.ExpandWidth(false)))
+                            {
+                                UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(
+                                    Target.CsvDirectoryPath,
                                 0);
+                            }
+
+                            var editIcon = EditorGUIUtility.IconContent("d_editicon.sml");
+                            editIcon.tooltip = "Open your CSV in a text editor";
+                            if (GUILayout.Button(editIcon, GUILayout.ExpandWidth(false)))
+                            {
+                                UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvAbsolutePath, 0);
+                            }
                         }
-
-
-                        if (GUILayout.Button(EditorGUIUtility.IconContent("d_editicon.sml"),
-                            GUILayout.ExpandWidth(false)))
-                        {
-                            UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvAbsolutePath, 0);
-                        }
-
-                        GUI.enabled = true;
                     }
                 }
 
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("cardPrefab"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("backSprite"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("cardPrefab"), new GUIContent("Card Prefab", "The prefab to use as the base for cards in this deck"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("backSprite"), new GUIContent("Card Back", "The sprite to use as the card backs when exporting using options that include backs"));
 
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("dpi"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("dpi"), new GUIContent("DPI", "The resolution of your exported card files in dots per inch / pixels per inch"));
                 }
 
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
-                    EditorGUILayout.LabelField("Card Export", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField(new GUIContent("Card Export", "Settings for exporting cards as individual image files"), EditorStyles.boldLabel);
 
                     var nameKeyProperty = serializedObject.FindProperty("cardNameKey");
                     var nameKey2Property = serializedObject.FindProperty("cardNameKey2");
@@ -116,7 +123,7 @@ namespace Deckard.Editor
 
                     var nameOptionIndex = Array.IndexOf(columnOptions, nameKeyProperty.stringValue);
                     nameOptionIndex = EditorGUILayout.Popup(
-                        "Name Column",
+                        new GUIContent("Name Column", "The sheet column to use as the prefix of the each card's filename"),
                         nameOptionIndex,
                         columnOptions);
 
@@ -126,7 +133,7 @@ namespace Deckard.Editor
 
                         var nameOption2Index = Array.IndexOf(columnOptions, nameKey2Property.stringValue);
                         nameOption2Index = EditorGUILayout.Popup(
-                            "Name Column 2",
+                            new GUIContent("Name Column 2", "The sheet column to use as the suffix of the each card's filename (if any)"),
                             nameOption2Index,
                             columnOptions);
 
@@ -149,83 +156,84 @@ namespace Deckard.Editor
                         serializedObject.FindProperty("prependCardCounts"),
                         new GUIContent(
                             "Include Counts",
-                            "Whether to prefix the file names with the card counts. Makes it easier to import the exported files into Tabletop Simulator."));
+                            "Whether to prefix the file names with the card counts. Makes it easier to import the exported files into Tabletop Simulator"));
 
 
                     EditorGUILayout.PropertyField(
                         serializedObject.FindProperty("includeBleeds"),
                         new GUIContent(
-                            "Include Bleeds",
-                            "Whether to render the bleed area of the card. Important for uploading the cards for print, such as to The Game Crafter."));
+                            "Render Bleeds",
+                            "Whether to render the bleed area of the card. Important for uploading the cards for print, such as to The Game Crafter"));
 
-                    GUI.enabled = Target.ReadyToExport;
-                    if (GUILayout.Button("Export card images"))
+                    using (new EditorGUI.DisabledScope(!Target.ReadyToExport))
                     {
-                        var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
-                        if (!string.IsNullOrEmpty(path))
+                        if (GUILayout.Button(new GUIContent("Export card images",
+                                "Export individual images for every card in the deck")))
                         {
-                            using (new EmptySceneScope())
+                            var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
+                            if (!string.IsNullOrEmpty(path))
                             {
-                                Target.ExportCardImages(path);
+                                using (new EmptySceneScope())
+                                {
+                                    Target.ExportCardImages(path);
+                                }
                             }
                         }
                     }
-
-                    GUI.enabled = true;
                 }
                 
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
-                    EditorGUILayout.LabelField("Atlas Export", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField(new GUIContent("Atlas Export", "Settings for exporting multiple cards in each image file, known as a sprite atlas"), EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("atlasDimensions"),
-                        new GUIContent("Atlas Dimensions"));
+                        new GUIContent("Atlas Dimensions", "How many columns and rows to include in each file of the atlas"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("atlasBackBehavior"),
-                        new GUIContent("Card Backs"));
-
-                    GUI.enabled = Target.ReadyToExport;
-                    if (GUILayout.Button("Export atlas images"))
+                        new GUIContent("Card Backs", "How to treat card backs in the exported files"));
+                    
+                    using (new EditorGUI.DisabledScope(!Target.ReadyToExport))
                     {
-                        var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
-                        if (!string.IsNullOrEmpty(path))
+                        if (GUILayout.Button(new GUIContent("Export atlas images", "Export sprite atlases")))
                         {
-                            using (new EmptySceneScope())
+                            var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
+                            if (!string.IsNullOrEmpty(path))
                             {
-                                Target.ExportAtlasImages(path);
+                                using (new EmptySceneScope())
+                                {
+                                    Target.ExportAtlasImages(path);
+                                }
                             }
                         }
                     }
-
-                    GUI.enabled = true;
                 }
 
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
-                    EditorGUILayout.LabelField("Print Export", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField(new GUIContent("Print Export", "Settings for exporting multiple cards on each printable sheet"), EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSizeInches"),
-                        new GUIContent("Page Size (inches)"));
+                        new GUIContent("Page Size (inches)", "The size of each printable sheet"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBleedInches"),
-                        new GUIContent("Bleed"));
+                        new GUIContent("Bleed (inches)", "How much space to leave empty on each edge of the sheet to aid in printing"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetSpacingInches"),
-                        new GUIContent("Card Spacing"));
+                        new GUIContent("Card Spacing (inches)", "How much space to leave between each card"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetShowCutMarkers"),
-                        new GUIContent("Cut Markers"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBackBehavior"),
-                        new GUIContent("Card Backs"));
+                        new GUIContent("Cut Markers", "Whether to render guides for where to cut out the cards on the sheet images"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBackBehavior"),    
+                        new GUIContent("Card Backs", "How to treat card backs in the sheet images"));
 
-                    GUI.enabled = Target.ReadyToExport;
-                    if (GUILayout.Button("Export sheet images"))
+                    using (new EditorGUI.DisabledScope(!Target.ReadyToExport))
                     {
-                        var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
-                        if (!string.IsNullOrEmpty(path))
+                        if (GUILayout.Button(new GUIContent("Export sheet images", "Export printable sheets")))
                         {
-                            using (new EmptySceneScope())
+                            var path = EditorUtility.OpenFolderPanel("Select export folder", Target.LastExportPath, "");
+                            if (!string.IsNullOrEmpty(path))
                             {
-                                Target.ExportPrintImages(path);
+                                using (new EmptySceneScope())
+                                {
+                                    Target.ExportPrintImages(path);
+                                }
                             }
                         }
                     }
-
-                    GUI.enabled = true;
                 }
 
                 EditorGUILayout.Space();
