@@ -12,6 +12,20 @@ Deckard is designed to be used an an editor tool only, and is not optimized or d
 * Customize text, images, colors, and more while using intuitive human-readable names in your spreadsheets
 * Export cards as individual files, print-and-play sheets, and sprite atlases for digital prototyping platforms (Screentop.gg, Tabletop Playground, etc.)
 
+## Installation
+We recommend you install Deckard via [OpenUPM](https://openupm.com/packages/com.jonagill.deckard/). Per OpenUPM's documentation:
+
+1. Open `Edit/Project Settings/Package Manager`
+2. Add a new Scoped Registry (or edit the existing OpenUPM entry) to read:
+    * Name: `package.openupm.com`
+    * URL: `https://package.openupm.com`
+    * Scope(s): `com.jonagill.deckard`
+3. Click Save (or Apply)
+4. Open Window/Package Manager
+5. Click the + button
+6. Select Add package by name...
+6. Click Add
+
 ## Core assets
 To generate a deck, you will want to create the following assets:
 
