@@ -139,7 +139,7 @@ Note that unlike CsvVisibility, this component will enable and disable specific 
 ![A screenshot of the Unity inspector for a EnableForExportType component](img/EnableForExportType.png)
 
 ## Bonus content
-####TextureImporter.preset
+#### TextureImporter.preset
 A Unity preset that specifies some desirable default values for importing textures as Deckard-ready Sprites.
 
 ## Tips & tricks
