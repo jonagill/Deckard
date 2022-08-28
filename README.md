@@ -3,7 +3,7 @@ Deckard is a Unity-based layout tool for card game prototyping, built for game d
 
 ![Cards from a prototype generated with Deckard](img/NockCards.png)
 
-There are lots of great existing tools for generating card assets, including [nanDECK](https://www.nandeck.com/), [Component Studio](https://component.studio/), [Squib](https://github.com/andymeneely/squib), [Cocktail](https://cocktail.software/download/), and [InDesign data merge](https://helpx.adobe.com/indesign/using/data-merge.html), but if you are most comfortable building out layouts in Unity, you might want to give Deckard a try!
+There are lots of great existing tools for generating card assets, including [nanDECK](https://www.nandeck.com/), [Component Studio](https://component.studio/), [Squib](https://github.com/andymeneely/squib), [Cocktail](https://cocktail.software/download/), [CardMaker](https://github.com/nhmkdev/cardmaker), and [InDesign data merge](https://helpx.adobe.com/indesign/using/data-merge.html), but if you are most comfortable building out layouts in Unity, you might want to give Deckard a try!
 
 Deckard is designed to be used as an editor tool only, and is not optimized or designed for use in builds or runtime gameplay.
 
