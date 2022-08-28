@@ -29,9 +29,6 @@ We recommend you install Deckard via [OpenUPM](https://openupm.com/packages/com.
 ## Core assets
 To generate a deck, you will want to create the following assets:
 
-​
-![Sample data from an example CSV file](img/CsvData.png)
-
 #### CSV data
 A CSV file generated from a spreadsheet will provide the raw data for customizing all the cards of your deck. This CSV can be exported from any existing spreadsheet in a tool like Google Sheets or Excel.
 
@@ -40,8 +37,8 @@ The top row of your spreadsheet will be treated as headers and define the name o
 Every other row of your spreadsheet will define a single card in your deck, defining details like its text, images, colors, resource counts, and so on. Feel free to use whatever names you want for images and colors -- you'll give these names meaning later in Unity.
 
 If you want to include multiple copies of each card in your deck, you can create a column titled Count to define the number of copies of each card in your deck.
-​
-![A screenshot of the Unity inspector for a DeckAsset object](img/DeckAsset.png)
+
+![Sample data from an example CSV file](img/CsvData.png)
 
 #### DeckAsset
 DeckAssets are ScriptableObject assets that define a deck of cards. They link together a CSV file and a corresponding DeckardCanvas prefab, and their inspector provides access to Deckard's various export options.
@@ -50,14 +47,14 @@ Hover over each property in the inspector to learn more about what it does.
 
 You can create a DeckAsset via the right-click `Create > Deckard > New Deck` context menu item.
 
-![A screenshot of the Unity inspector for a DeckardCanvas component](img/DeckardCanvas.png)
+![A screenshot of the Unity inspector for a DeckAsset object](img/DeckAsset.png)
 
 #### DeckardCanvas prefab
 DeckardCanvases are components that go on a Unity prefab to define a card's layout. You can then use Unity's regular set of RectTransform and layout options to design your card's layout.
 
 To create a new DeckardCanvas, create a new GameObject, add the DeckardCanvas component to it, and then save it as a prefab.
 
-![A screenshot of the Unity inspector for a SpriteCollection object](img/SpriteCollection.png)
+![A screenshot of the Unity inspector for a DeckardCanvas component](img/DeckardCanvas.png)
 
 #### SpriteCollection
 SpriteCollections are ScriptableObject assets that define a set of sprites. Each sprite is assigned a human-readable key so that you can easily reference it from your spreadsheets.
@@ -66,12 +63,14 @@ The "Bulk Import from Folder" option allows you to rapidly add all of the sprite
 
 You can create a SpriteCollection via the right-click `Create > Deckard > New SpriteCollection` context menu item.
 
-![A screenshot of the Unity inspector for a ColorCollection object](img/ColorCollection.png)
+![A screenshot of the Unity inspector for a SpriteCollection object](img/SpriteCollection.png)
 
 #### ColorCollection
 SpriteCollections are ScriptableObject assets that define a set of colors. Each color is assigned a human-readable key so that you can easily reference it from your spreadsheets.
 
 You can create a ColorCollection via the right-click `Create > Deckard > New ColorCollection` context menu item.
+
+![A screenshot of the Unity inspector for a ColorCollection object](img/ColorCollection.png)
 
 ## Decorator components
 Deckard provides a suite of components that can be placed on your card prefabs to customize each card during the export process.
@@ -83,14 +82,12 @@ These components read in fields from your spreadsheet CSV and modify the cards u
 
 For every CSV data component, you will have to specify the name of the column that this component will reference when running its logic. A search field and drop-down box are provided to help you find the valid names of the columns in all of your decks.
 
-![A screenshot of the Unity inspector for a CsvSprite component](img/CsvSprite.png)
-
 #### CsvSprite
 This component will assign a sprite to an Image component on the same GameObject based on the contents of a CSV field. You must assign a reference to the SpriteCollection that you want to use for this object.
 
 If no sprite can be found in the SpriteCollection matching the name in the CSV field, the Image will be disabled and hidden in any exports. This means that the Image will be hidden appropriately for empty fields in your CSV.
 
-![A screenshot of the Unity inspector for a CsvText component](img/CsvText.png)
+![A screenshot of the Unity inspector for a CsvSprite component](img/CsvSprite.png)
 
 #### CsvText
 This component copies the contents of a CSV field into a TextMeshProUGUI text component on the same GameObject.
@@ -99,29 +96,29 @@ If your TextMeshProUGUI component has rich text enabled, you can use [rich text 
 
 By assigning a reference to a SpriteCollection asset, you can embed icon sprites within your text by surrounding the name of a sprite in that collection with double carats, such as: `<<spritename>>`. By default, embedded sprites will be tinted to match the color of the surrounding text. To render an icon without colorization, add an exclamation point to the start of it's name like so: `<<!spritename>>`.
 
-![A screenshot of the Unity inspector for a CsvColor component](img/CsvColor.png)
+![A screenshot of the Unity inspector for a CsvText component](img/CsvText.png)
 
 #### CsvColor
 This component colorizes Graphic components (TextMeshProUGUI, Image, etc.) on the same object based on the contents of a CSV field. You must assign a reference to the ColorCollection that you want to use for this object.
 
-![A screenshot of the Unity inspector for a CsvCount component](img/CsvCount.png)
+![A screenshot of the Unity inspector for a CsvColor component](img/CsvColor.png)
 
 #### CsvCount
 This component will duplicate the GameObject that it's on to match the number of instances specified in a CSV field. This is useful for things like mana costs or health values where you want a variable number of icons based on a certain value on the card.
 
 You will generally want to make sure that any GameObjects containing a CsvCount component are children of a HorizontalLayoutGroup, VerticalLayoutGroup, or GridLayoutGroup so that they can be dynamically positioned correctly based on the number of instances generated.
 
-![A screenshot of the Unity inspector for a CsvVisibility component](img/CsvVisibility.png)
+![A screenshot of the Unity inspector for a CsvCount component](img/CsvCount.png)
 
 #### CsvVisibility
 This component will enable and disable a GameObject (and all of its children) by comparing a value in a CSV field with the conditions and values specified on the component.
 
 If multiple conditions are specified, you can choose whether a single condition being true will make the GameObject visible, or require that all conditions be true before the GameObject is made visible.
 
+![A screenshot of the Unity inspector for a CsvVisibility component](img/CsvVisibility.png)
+
 ### Export type components
 These components will alter their behavior based on the export settings you are using.
-
-![A screenshot of the Unity inspector for a EnableForBleed component](img/EnableForBleeds.png)
 
 #### EnableForBleed
 This component will enable or disable the targeted components based on whether the current export contains the bleed region of the cards or not.
@@ -130,7 +127,7 @@ Bleeds are always included for printable sheet exports, never included for sprit
 
 Note that unlike CsvVisibility, this component will enable and disable specific components, rather than entire GameObjects. This means you can use it to target specific components to disable without altering the overall layout of your card.
 
-![A screenshot of the Unity inspector for a EnableForExportType component](img/EnableForExportType.png)
+![A screenshot of the Unity inspector for a EnableForBleed component](img/EnableForBleeds.png)
 
 #### EnableForExportType
 This component will enable or disable the targeted components based on whether you are exporting individual card images or whole sheets of cards (printable sheets or sprite atlases).
@@ -138,6 +135,8 @@ This component will enable or disable the targeted components based on whether y
 This is mainly useful for enabling and disabling background elements that you want opaque when exporting sheets, but transparent when exporting individual cards (such as the exterior region of circular tokens).
 
 Note that unlike CsvVisibility, this component will enable and disable specific components, rather than entire GameObjects. This means you can use it to target specific components to disable without altering the overall layout of your card.
+
+![A screenshot of the Unity inspector for a EnableForExportType component](img/EnableForExportType.png)
 
 ## Bonus content
 ####TextureImporter.preset
