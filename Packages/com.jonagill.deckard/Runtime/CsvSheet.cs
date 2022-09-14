@@ -139,6 +139,11 @@ namespace Deckard.Data
                 return false;
             }
 
+            if (fieldIndex >= record.Fields.Count)
+            {
+                return false;
+            }
+            
             value = record.Fields[fieldIndex];
 
             return true;
