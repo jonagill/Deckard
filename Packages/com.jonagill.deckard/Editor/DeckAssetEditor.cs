@@ -87,16 +87,26 @@ namespace Deckard.Editor
                             folderIcon.tooltip = "Reveal the CSV file in the file explorer";
                             if (GUILayout.Button(folderIcon, GUILayout.ExpandWidth(false)))
                             {
-                                UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(
-                                    Target.CsvDirectoryPath,
-                                0);
+                                EditorUtility.RevealInFinder(Target.CsvAbsolutePath);
                             }
 
                             var editIcon = EditorGUIUtility.IconContent("d_editicon.sml");
                             editIcon.tooltip = "Open your CSV in a text editor";
                             if (GUILayout.Button(editIcon, GUILayout.ExpandWidth(false)))
                             {
-                                UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(Target.CsvAbsolutePath, 0);
+                                if (Target.TryGetCsvProjectPath(out var path))
+                                {
+                                    var csv = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+                                    if (csv != null)
+                                    {
+                                        AssetDatabase.OpenAsset(csv);    
+                                    }    
+                                }
+                                else
+                                {
+                                    UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(
+                                        Target.CsvAbsolutePath, 0);
+                                }
                             }
                         }
                     }

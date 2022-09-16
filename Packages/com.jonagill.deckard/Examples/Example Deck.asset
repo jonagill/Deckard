@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1237c8f0deea7f54aae4a958457385f8, type: 3}
   m_Name: Example Deck
   m_EditorClassIdentifier: 
-  csvPath: /Users/jonagill/Git/Deckard/Packages/com.jonagill.deckard/Examples/ExampleCsv.csv
-  pathIsRelative: 0
+  csvPath: Packages/com.jonagill.deckard/Examples/ExampleCsv.csv
+  pathIsAssetDatabasePath: 1
   csvSheet:
     headers:
     - Color
@@ -207,7 +207,7 @@ MonoBehaviour:
   prependCardCounts: 1
   includeBleeds: 0
   oneSheetSizeInches: {x: 8.5, y: 11}
-  oneSheetBleedInches: 0.125
+  oneSheetBleedInches: 0.25
   oneSheetSpacingInches: 0.125
   oneSheetShowCutMarkers: 1
   oneSheetBackBehavior: 2

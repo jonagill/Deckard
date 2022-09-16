@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Deckard.Data;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Deckard
@@ -95,7 +96,8 @@ namespace Deckard
         private static readonly StringBuilder INSTANTANEOUS_STRING_BUILDER = new StringBuilder();
 
         [SerializeField] private string csvPath = string.Empty;
-        [SerializeField] private bool pathIsRelative = false;
+        [SerializeField, FormerlySerializedAs("pathIsRelative")]
+        private bool pathIsAssetDatabasePath = false;
         [SerializeField] private CsvSheet csvSheet;
 
         [SerializeField] private DeckardCanvas cardPrefab;
@@ -125,9 +127,13 @@ namespace Deckard
             {
                 if (!string.IsNullOrEmpty(csvPath))
                 {
-                    if (pathIsRelative)
+                    if (pathIsAssetDatabasePath)
                     {
-                        return Path.Combine(Application.dataPath, csvPath);
+                        var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(csvPath);
+                        if (asset != null)
+                        {
+                            return new FileInfo(Path.GetFullPath(csvPath)).FullName;
+                        }
                     }
                     else
                     {
@@ -139,15 +145,18 @@ namespace Deckard
             }
         }
 
-        public string CsvDirectoryPath
+        public bool TryGetCsvProjectPath(out string path)
         {
-            get
+            if (pathIsAssetDatabasePath)
             {
-                var path = CsvAbsolutePath;
-                return Path.GetDirectoryName(CsvAbsolutePath);
+                path = csvPath;
+                return true;
             }
-        }
 
+            path = null;
+            return false;
+        }
+        
         private string GlobalExportPrefName => $"{GetType().Name}_LastExportPath";
         private string ExportPrefName => $"{GetType().Name}_{name}_LastExportPath";
         public string LastExportPath
@@ -156,7 +165,7 @@ namespace Deckard
             {
 #if UNITY_EDITOR
                 var customPath = EditorPrefs.GetString(ExportPrefName, null);
-    if (!string.IsNullOrEmpty(customPath) && Directory.Exists(customPath))
+                if (!string.IsNullOrEmpty(customPath) && Directory.Exists(customPath))
                 {
                     return customPath;
                 }
@@ -189,15 +198,24 @@ namespace Deckard
 
         public void SetCsvPath(string absolutePath)
         {
-            if (absolutePath.StartsWith(Application.dataPath))
+            // Check if this path is within a folder that AssetDatabase can reference
+            // This can't just check for Application.dataPath, since this path might be in a package
+            // Referenced from Rider's implementation here:
+            // https://github.com/JetBrains/resharper-unity/pull/2124/files#diff-e1db1dce6b73974c5729bef41ba2cd440fbd0faddd35f7bc8646f88b7df0bad1R78-R81
+            var unityPath = AssetDatabase.GetAllAssetPaths()
+                .FirstOrDefault(a =>
+                    new FileInfo(Path.GetFullPath(a)).FullName ==
+                    absolutePath);  // FileInfo normalizes separators (required on Windows)
+            
+            if (!string.IsNullOrEmpty(unityPath))
             {
-                csvPath = absolutePath.Substring(Application.dataPath.Length + 1);
-                pathIsRelative = true;
+                csvPath = unityPath;
+                pathIsAssetDatabasePath = true;
             }
             else
             {
                 csvPath = absolutePath;
-                pathIsRelative = false;
+                pathIsAssetDatabasePath = false;
             }
             
             RefreshCsvSheet();
@@ -232,7 +250,7 @@ namespace Deckard
                 oneSheetBleedInches,
                 oneSheetSpacingInches);
 
-            if (oneSheetBackBehavior == CardBackBehavior.SeparateSheets)
+            if (oneSheetBackBehavior == CardBackBehavior.SeparateSheets && backSprite != null)
             {
                 var cardBack = InstantiateCardBack(cardPrefab, backSprite);
                 using (new TempObjectScope(cardBack.gameObject))
@@ -280,7 +298,7 @@ namespace Deckard
                 0f,
                 0f);
 
-            if (atlasBackBehavior == CardBackBehavior.SeparateSheets)
+            if (atlasBackBehavior == CardBackBehavior.SeparateSheets && backSprite != null)
             {
                 var cardBack = InstantiateCardBack(cardPrefab, backSprite);
                 using (new TempObjectScope(cardBack.gameObject))
