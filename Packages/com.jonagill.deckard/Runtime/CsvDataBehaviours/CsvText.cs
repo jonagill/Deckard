@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using TMPro;
@@ -68,13 +70,19 @@ namespace Deckard.Data
             string MatchEvaluator(Match match)
             {
                 var key = match.Groups["Key"].Value;
-                var assetName = GetTMProSpriteAssetName(spriteCollection, key);
+                if (!spriteCollection.TryGetValidKey(key, out var validKey))
+                {
+                    // There is no sprite matching our key -- just return the text as-is
+                    return match.Value;
+                }
+                 
+                var assetName = GetTMProSpriteAssetName(spriteCollection, validKey);
 
                 // Disable tinting if the key is prefaced with an exclamation point
                 var shouldTint = string.IsNullOrEmpty(match.Groups["Exclamation"].Value);
                 var tintTag = shouldTint ? " tint" : string.Empty;
                 
-                var tmProTag = $"<sprite=\"{assetName}\" name=\"{key}\"{tintTag}>";
+                var tmProTag = $"<sprite=\"{assetName}\" name=\"{validKey}\"{tintTag}>";
                 return tmProTag;
             }
             
