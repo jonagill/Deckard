@@ -39,7 +39,13 @@ namespace Deckard
 
         public bool TryGetSpriteForKey(string key, out Sprite sprite)
         {
-            sprite = SpriteEntries.FirstOrDefault(e => e.Key == key)?.Sprite;
+            if (!TryGetValidKey(key, out var validKey))
+            {
+                sprite = null;
+                return false;
+            }
+            
+            sprite = SpriteEntries.FirstOrDefault(e => e.Key == validKey)?.Sprite;
             return sprite != null;
         }
 
@@ -50,6 +56,30 @@ namespace Deckard
                 Key = key,
                 Sprite = sprite
             });
+        }
+
+        public bool TryGetValidKey(string key, out string validKey)
+        {
+            var entry = SpriteEntries.FirstOrDefault(e => string.Equals(e.Key, key, StringComparison.InvariantCulture));
+            if (entry != null)
+            {
+                // The provided key is valid
+                validKey = key;
+                return true;
+            }
+
+            // There is no sprite matching our key exactly -- try a case insensitive check
+            entry = SpriteEntries.FirstOrDefault(e =>
+                    string.Equals(e.Key, key, StringComparison.InvariantCultureIgnoreCase));
+            if (entry != null)
+            {
+                // We found a valid key via case insensitive check. Use that instead
+                validKey = entry.Key;
+                return true;
+            }
+
+            validKey = null;
+            return false;
         }
     }
 }
