@@ -108,6 +108,11 @@ namespace Deckard
                 }
             }
         }
+
+        /// <summary>
+        /// The size of the card's contents in Unity units. 
+        /// </summary>
+        public Vector2 ContentSizeUnits => InchesToUnits(ContentSizeInches);
         
         [SerializeField, Tooltip("The size of the bleed, the area outside of the card that is printed to ensure that the colors extend all the way to the edges after cutting out the card.")] 
         private Vector2 bleedInches;
@@ -131,6 +136,11 @@ namespace Deckard
         /// The total size of the canvas rendered when preparing files for printing. 
         /// </summary>
         public Vector2 TotalPrintSizeInches => contentSizeInches + (bleedInches * 2);
+
+        /// <summary>
+        /// The total size of the canvas in Unity units. 
+        /// </summary>
+        public Vector2 TotalPrintSizeUnits => InchesToUnits(TotalPrintSizeInches);
 
         /// <summary>
         /// The size of the safe zone on the card.
@@ -255,7 +265,7 @@ namespace Deckard
                 isDirty = true;
             }
 
-            var sizeDelta = TotalPrintSizeInches * UNITS_PER_INCH;
+            var sizeDelta = TotalPrintSizeUnits;
             if (RectTransform.sizeDelta != sizeDelta)
             {
                 RectTransform.sizeDelta = sizeDelta;

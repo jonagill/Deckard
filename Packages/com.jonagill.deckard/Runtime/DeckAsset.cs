@@ -103,16 +103,18 @@ namespace Deckard
         [SerializeField] private DeckardCanvas cardPrefab;
         [SerializeField] private Sprite backSprite;
 
-        [SerializeField] private bool prependCardCounts = false;
-        [SerializeField] private bool includeBleeds = false;
+        [FormerlySerializedAs("prependCardCounts")] [SerializeField] private bool soloPrependCardCounts = false;
+        [FormerlySerializedAs("includeBleeds")] [SerializeField] private bool soloIncludeBleeds = false;
 
         [SerializeField] private Vector2 oneSheetSizeInches = new Vector2(8.5f, 11f);
         [SerializeField] private float oneSheetBleedInches = .125f;
         [SerializeField] private float oneSheetSpacingInches = .125f;
         [SerializeField] private bool oneSheetShowCutMarkers = true;
+        [SerializeField] private bool oneSheetRespectCounts = true;
         [SerializeField] private CardBackBehavior oneSheetBackBehavior = CardBackBehavior.SeparateSheets;
 
         [SerializeField] private Vector2Int atlasDimensions = new Vector2Int(7, 5);
+        [SerializeField] private bool atlasRespectCounts = false;
         [SerializeField] private CardBackBehavior atlasBackBehavior = CardBackBehavior.ShowInCorner;
 
         [SerializeField] private string cardNameKey;
@@ -242,10 +244,12 @@ namespace Deckard
                 path, 
                 "Print_Front", 
                 cardPrefab, 
+                true,
                 backsInCorner, 
                 GridLayoutGroup.Corner.UpperLeft,
                 TextAnchor.UpperCenter,
                 oneSheetShowCutMarkers,
+                oneSheetRespectCounts,
                 oneSheetSizeInches,
                 oneSheetBleedInches,
                 oneSheetSpacingInches);
@@ -259,10 +263,12 @@ namespace Deckard
                         path,
                         "Print_Back",
                         cardBack,
+                        true,
                         backsInCorner,
                         GridLayoutGroup.Corner.UpperRight,
                         TextAnchor.UpperCenter,
                         oneSheetShowCutMarkers,
+                        oneSheetRespectCounts,
                         oneSheetSizeInches,
                         oneSheetBleedInches,
                         oneSheetSpacingInches);
@@ -290,10 +296,12 @@ namespace Deckard
                 path, 
                 "Atlas_Front", 
                 cardPrefab, 
+                false,
                  backsInCorner,
                 GridLayoutGroup.Corner.UpperLeft,
                 TextAnchor.UpperLeft,
                 false,
+                atlasRespectCounts,
                 sizeInches,
                 0f,
                 0f);
@@ -307,10 +315,12 @@ namespace Deckard
                         path,
                         "Atlas_Back",
                         cardBack,
+                        false,
                         backsInCorner,
                         GridLayoutGroup.Corner.UpperLeft,
                         TextAnchor.UpperLeft,
                         false,
+                        atlasRespectCounts,
                         sizeInches,
                         0,
                         0);
@@ -323,7 +333,7 @@ namespace Deckard
 
         public void ExportCardImages(string path)
         {
-            ExportCardImagesInternal(path, includeBleeds, false);
+            ExportCardImagesInternal(path, soloIncludeBleeds, false);
             OpenInFileBrowser.Open(path);
             LastExportPath = path;
         }
@@ -349,12 +359,8 @@ namespace Deckard
             {
                 for (var recordIndex = 0; recordIndex < csvSheet.RecordCount; recordIndex++)
                 {
-                    if (!csvSheet.TryGetIntValue("Count", recordIndex, out var sheetCount))
-                    {
-                        sheetCount = 1;
-                    }
+                    var exportCount = GetExportCountForRecord(recordIndex, respectCount, out var sheetCount);
 
-                    var exportCount = respectCount ? sheetCount : 1;
 
                     using (new ApplyCardBehaviorsScope(cardInstance.gameObject, exportParams, csvSheet, recordIndex))
                     {
@@ -370,7 +376,7 @@ namespace Deckard
 
                             var fileName = $"{cardName}.png";
 
-                            if (prependCardCounts)
+                            if (soloPrependCardCounts)
                             {
                                 // Prepend the count for easy importing into Tabletop Simulator
                                 fileName = $"{sheetCount:00}x " + fileName;
@@ -394,10 +400,12 @@ namespace Deckard
             string path, 
             string fileLabel,
             DeckardCanvas cellPrefab,
+            bool showCardBleeds,
             bool showCardBackInCorner,
             GridLayoutGroup.Corner startCorner,
             TextAnchor childAlignment,
             bool showCutMarkers,
+            bool respectCounts,
             Vector2 sizeInches,
             float bleedInches,
             float spacingInches)
@@ -411,6 +419,7 @@ namespace Deckard
             
             GenerateGridCanvas(
                 cellPrefab,
+                showCardBleeds,
                 showCardBackInCorner,
                 backSprite,
                 startCorner,
@@ -463,10 +472,7 @@ namespace Deckard
 
                 for (var recordIndex = 0; recordIndex < csvSheet.RecordCount; recordIndex++)
                 {
-                    if (!csvSheet.TryGetIntValue("Count", recordIndex, out var count))
-                    {
-                        count = 1;
-                    }
+                    var count = GetExportCountForRecord(recordIndex, respectCounts, out _);
 
                     for (var countIndex = 0; countIndex < count; countIndex++)
                     {
@@ -555,8 +561,42 @@ namespace Deckard
             return sb.ToString();
         }
 
+        private int GetExportCountForRecord(int recordIndex, bool respectCounts, out int sheetCount)
+        {
+            const string CountHeader = "Count";
+                    
+            // Default to outputting one image per record
+            int exportCount = 1;
+            sheetCount = 1;
+            
+            // See if this record has a Count column
+            if (csvSheet.Headers.Contains(CountHeader))
+            {
+                // See if this record has a Count specified
+                if (!csvSheet.TryGetIntValue("Count", recordIndex, out sheetCount))
+                {
+                    // The sheet has a Count column, but this record has no count specified
+                    sheetCount = 0;
+                }
+
+                // If we're not respecting counts, output once per card with a valid count,
+                // regardless of the count specified in the sheet
+                if (!respectCounts && sheetCount > 1)
+                {
+                    exportCount = 1;
+                }
+                else
+                {
+                    exportCount = sheetCount;
+                }
+            }
+
+            return exportCount;
+        }
+
         private static void GenerateGridCanvas(
             DeckardCanvas cellPrefab,
+            bool showCardBleeds,
             bool showCardBackInCorner,
             Sprite backSprite,
             GridLayoutGroup.Corner startCorner,
@@ -581,7 +621,7 @@ namespace Deckard
             var sheetGrid = sheetCanvas.gameObject.AddComponent<GridLayoutGroup>();
             var padding = DeckardCanvas.InchesToUnits(bleedInches);
             var spacing = DeckardCanvas.InchesToUnits(spacingInches);
-            var cardSize = cellPrefab.RectTransform.rect.size;
+            var cardSize = showCardBleeds ? cellPrefab.TotalPrintSizeUnits : cellPrefab.ContentSizeUnits;
 
             sheetGrid.cellSize = cardSize;
             sheetGrid.padding = new RectOffset(padding, padding, padding, padding);
@@ -606,11 +646,23 @@ namespace Deckard
 
             for (var i = 0; i < maxTotalInstances; i++)
             {
-                var cardInstance = Instantiate(cellPrefab, sheetGrid.transform, false);
+                InstantiateCardHolder(
+                    cellPrefab, 
+                    sheetGrid.transform,
+                    out var holderRoot,
+                    out var holderMask);
+                
+                var cardInstance = Instantiate(cellPrefab, holderMask.transform, false);
+                
+                // Center the card in the middle of the mask
+                var center = Vector2.one * .5f;
+                cardInstance.RectTransform.anchorMax = center;
+                cardInstance.RectTransform.anchorMin = center;
+                cardInstance.RectTransform.anchoredPosition = Vector2.zero;
 
                 if (showCutMarkers)
                 {
-                    InstantiateCutMarkers(cardInstance);
+                    InstantiateCutMarkers(cardInstance, holderRoot.transform);
                 }
                 
                 cardInstances.Add(cardInstance);
@@ -634,21 +686,21 @@ namespace Deckard
             LayoutRebuilder.ForceRebuildLayoutImmediate(sheetCanvas.RectTransform);
         }
 
-        private static RectTransform InstantiateCutMarkers(DeckardCanvas cardRoot)
+        private static RectTransform InstantiateCutMarkers(DeckardCanvas cardRoot, Transform parent)
         {
             var cutMarkersPrefab = Resources.Load<RectTransform>("[CutMarkers]");
-            var cutMarkersInstance = Instantiate(cutMarkersPrefab, cardRoot.transform, false);
-            var cardSizeUnits = DeckardCanvas.InchesToUnits(cardRoot.ContentSizeInches);
+            var cutMarkersInstance = Instantiate(cutMarkersPrefab, parent, false);
+            var cardSizeUnits = cardRoot.ContentSizeUnits;
             cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
             cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
             return cutMarkersInstance;
         }
 
-        private static DeckardCanvas InstantiateCardBack(DeckardCanvas cardPrefab, Sprite backSprite, Transform root = null)
+        private static DeckardCanvas InstantiateCardBack(DeckardCanvas cardPrefab, Sprite backSprite, Transform parent = null)
         {
             if (cardPrefab == null) return null;
             var backPrefab = new GameObject("CardBack", typeof(Canvas));
-            backPrefab.transform.SetParent(root, false);
+            backPrefab.transform.SetParent(parent, false);
             
             var canvas = backPrefab.AddComponent<DeckardCanvas>();
             canvas.ContentSizeInches = cardPrefab.ContentSizeInches;
@@ -659,6 +711,28 @@ namespace Deckard
             graphic.type = Image.Type.Filled;
 
             return canvas;
+        }
+        
+        private static void InstantiateCardHolder(
+            DeckardCanvas cardPrefab,
+            Transform parent, 
+            out GameObject rootObject,
+            out GameObject maskObject)
+        {
+            var cardSizeUnits = cardPrefab.ContentSizeUnits;
+            
+            rootObject = new GameObject("CardHolder", typeof(RectTransform));
+            var rootTransform = rootObject.GetComponent<RectTransform>();
+            rootTransform.SetParent(parent, false);
+            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
+            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
+            
+            maskObject = new GameObject("Mask", typeof(RectTransform));
+            var maskTransform = maskObject.GetComponent<RectTransform>();
+            maskTransform.SetParent(rootTransform, false);
+            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
+            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
+            maskObject.AddComponent<RectMask2D>();
         }
 
         private static GameObject InstantiateSpaceFiller(Transform parent)

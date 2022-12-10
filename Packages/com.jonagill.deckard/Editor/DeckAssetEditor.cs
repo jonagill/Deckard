@@ -163,14 +163,13 @@ namespace Deckard.Editor
                     }
 
                     EditorGUILayout.PropertyField(
-                        serializedObject.FindProperty("prependCardCounts"),
+                        serializedObject.FindProperty("soloPrependCardCounts"),
                         new GUIContent(
-                            "Include Counts",
+                            "Add Counts to Names",
                             "Whether to prefix the file names with the card counts. Makes it easier to import the exported files into Tabletop Simulator"));
 
-
                     EditorGUILayout.PropertyField(
-                        serializedObject.FindProperty("includeBleeds"),
+                        serializedObject.FindProperty("soloIncludeBleeds"),
                         new GUIContent(
                             "Render Bleeds",
                             "Whether to render the bleed area of the card. Important for uploading the cards for print, such as to The Game Crafter"));
@@ -197,6 +196,8 @@ namespace Deckard.Editor
                     EditorGUILayout.LabelField(new GUIContent("Atlas Export", "Settings for exporting multiple cards in each image file, known as a sprite atlas"), EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("atlasDimensions"),
                         new GUIContent("Atlas Dimensions", "How many columns and rows to include in each file of the atlas"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("atlasRespectCounts"),
+                        new GUIContent("Respect Counts", "Whether to render multiple copies each card based on its Count column."));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("atlasBackBehavior"),
                         new GUIContent("Card Backs", "How to treat card backs in the exported files"));
                     
@@ -227,6 +228,8 @@ namespace Deckard.Editor
                         new GUIContent("Card Spacing (inches)", "How much space to leave between each card"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetShowCutMarkers"),
                         new GUIContent("Cut Markers", "Whether to render guides for where to cut out the cards on the sheet images"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetRespectCounts"),
+                        new GUIContent("Respect Counts", "Whether to render multiple copies each card based on its Count column."));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBackBehavior"),    
                         new GUIContent("Card Backs", "How to treat card backs in the sheet images"));
 
