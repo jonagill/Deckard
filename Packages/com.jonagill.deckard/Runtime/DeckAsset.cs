@@ -453,7 +453,7 @@ namespace Deckard
                 var exportParams = new ExportParams()
                 {
                     ExportType = ExportType.Sheet,
-                    IncludeBleeds = true,
+                    IncludeBleeds = showCardBleeds,
                 };
                 
                 void ExportSheetAndClearScopes()
