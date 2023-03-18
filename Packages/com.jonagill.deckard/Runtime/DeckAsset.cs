@@ -729,6 +729,11 @@ namespace Deckard
         {
             var cutMarkersPrefab = Resources.Load<RectTransform>("[CutMarkers]");
             var cutMarkersInstance = Instantiate(cutMarkersPrefab, parent, false);
+            
+            var cardSizeUnits = cardRoot.ContentSizeUnits;
+            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
+            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
+            
             return cutMarkersInstance;
         }
 
