@@ -1,7 +1,7 @@
 {
   "name": "com.jonagill.deckard",
   "description": "A tool for using Unity's UI system to lay out and export decks of cards to PNG files, printable pages, and sprite atlases.",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "unity": "2019.2",
   "displayName": "Deckard"
 }

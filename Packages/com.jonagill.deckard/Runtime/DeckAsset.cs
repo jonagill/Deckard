@@ -269,6 +269,17 @@ namespace Deckard
                 var cardBack = InstantiateCardBack(cardPrefab, backSprite);
                 using (new TempObjectScope(cardBack.gameObject))
                 {
+                    // Perform the opposite rotation from the front so the orientation is correct when printed
+                    var rotation = oneSheetRotation;
+                    if (rotation == CardRotation.RotateCW)
+                    {
+                        rotation = CardRotation.RotateCCW;
+                    }
+                    else if (rotation == CardRotation.RotateCCW)
+                    {
+                        rotation = CardRotation.RotateCW;
+                    }
+                    
                     ExportSheetImagesInternal(
                         path,
                         "Print_Back",
@@ -277,7 +288,7 @@ namespace Deckard
                         backsInCorner,
                         GridLayoutGroup.Corner.UpperRight,
                         TextAnchor.UpperCenter,
-                        oneSheetRotation,
+                        rotation,
                         oneSheetShowCutMarkers,
                         oneSheetRespectCounts,
                         oneSheetSizeInches,
