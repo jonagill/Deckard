@@ -115,7 +115,7 @@ namespace Deckard
         [FormerlySerializedAs("includeBleeds")] [SerializeField] private bool soloIncludeBleeds = false;
 
         [SerializeField] private Vector2 oneSheetSizeInches = new Vector2(8.5f, 11f);
-        [SerializeField] private float oneSheetBleedInches = .125f;
+        [SerializeField] private Vector2 oneSheetBleedInches = new Vector2(.125f, .125f);
         [SerializeField] private float oneSheetSpacingInches = .125f;
         [SerializeField] private bool oneSheetShowCutMarkers = true;
         [SerializeField] private bool oneSheetRespectCounts = true;
@@ -315,7 +315,7 @@ namespace Deckard
                 false,
                 atlasRespectCounts,
                 sizeInches,
-                0f,
+                Vector2.zero,
                 0f);
 
             if (atlasBackBehavior == CardBackBehavior.SeparateSheets && backSprite != null)
@@ -335,7 +335,7 @@ namespace Deckard
                         false,
                         atlasRespectCounts,
                         sizeInches,
-                        0,
+                        Vector2.zero,
                         0);
                 }
             }
@@ -421,7 +421,7 @@ namespace Deckard
             bool showCutMarkers,
             bool respectCounts,
             Vector2 sizeInches,
-            float bleedInches,
+            Vector2 bleedInches,
             float spacingInches)
         {
             if (cellPrefab == null)
@@ -619,7 +619,7 @@ namespace Deckard
             CardRotation cardRotation,
             bool showCutMarkers,
             Vector2 sizeInches,
-            float bleedInches,
+            Vector2 bleedInches,
             float spacingInches,
             out DeckardCanvas sheetCanvas, 
             out List<DeckardCanvas> cardInstances,
@@ -628,7 +628,7 @@ namespace Deckard
         {
             sheetCanvas = new GameObject("SheetInstance").AddComponent<DeckardCanvas>();
             sheetCanvas.ContentSizeInches = sizeInches;
-            sheetCanvas.BleedInches = Vector2.zero; // We will manually configure bleed via padding rather than 
+            sheetCanvas.BleedInches = Vector2.zero; // We will manually configure bleed via padding 
             sheetCanvas.SafeZoneInches = Vector2.zero;
 
             var sheetBackground = sheetCanvas.gameObject.AddComponent<Image>();
@@ -662,7 +662,7 @@ namespace Deckard
             }
 
             sheetGrid.cellSize = cardSize;
-            sheetGrid.padding = new RectOffset(padding, padding, padding, padding);
+            sheetGrid.padding = new RectOffset((int) padding.x, (int) padding.x, (int) padding.y, (int) padding.y);
             sheetGrid.spacing = Vector2.one * spacing;
             sheetGrid.startCorner = startCorner;
             sheetGrid.startAxis = GridLayoutGroup.Axis.Horizontal;
@@ -671,8 +671,8 @@ namespace Deckard
             cardInstances = new List<DeckardCanvas>();
 
             var sheetRect = sheetCanvas.RectTransform.rect;
-            var availableWidth = sheetRect.width - (padding * 2);
-            var availableHeight = sheetRect.height - (padding * 2);
+            var availableWidth = sheetRect.width - (padding.x * 2);
+            var availableHeight = sheetRect.height - (padding.y * 2);
             
             var maxHorizontalInstances = Mathf.FloorToInt((availableWidth + spacing) / (cardSize.x + spacing));
             var maxVerticalInstances = Mathf.FloorToInt((availableHeight + spacing) / (cardSize.y + spacing));
