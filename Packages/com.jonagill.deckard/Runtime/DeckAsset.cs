@@ -22,6 +22,14 @@ namespace Deckard
             SeparateSheets
         }
 
+        public enum CardRotation 
+        {
+            AsAuthored,
+            RotateCW,
+            RotateCCW,
+            Rotate180
+        }
+
         private class ApplyCardBehaviorsScope : IDisposable
         {
             private IReadOnlyList<CsvDataBehaviour> csvBehaviours;
@@ -111,6 +119,7 @@ namespace Deckard
         [SerializeField] private float oneSheetSpacingInches = .125f;
         [SerializeField] private bool oneSheetShowCutMarkers = true;
         [SerializeField] private bool oneSheetRespectCounts = true;
+        [SerializeField] private CardRotation oneSheetRotation = CardRotation.AsAuthored;
         [SerializeField] private CardBackBehavior oneSheetBackBehavior = CardBackBehavior.SeparateSheets;
 
         [SerializeField] private Vector2Int atlasDimensions = new Vector2Int(7, 5);
@@ -248,6 +257,7 @@ namespace Deckard
                 backsInCorner, 
                 GridLayoutGroup.Corner.UpperLeft,
                 TextAnchor.UpperCenter,
+                oneSheetRotation,
                 oneSheetShowCutMarkers,
                 oneSheetRespectCounts,
                 oneSheetSizeInches,
@@ -267,6 +277,7 @@ namespace Deckard
                         backsInCorner,
                         GridLayoutGroup.Corner.UpperRight,
                         TextAnchor.UpperCenter,
+                        oneSheetRotation,
                         oneSheetShowCutMarkers,
                         oneSheetRespectCounts,
                         oneSheetSizeInches,
@@ -300,6 +311,7 @@ namespace Deckard
                  backsInCorner,
                 GridLayoutGroup.Corner.UpperLeft,
                 TextAnchor.UpperLeft,
+                CardRotation.AsAuthored,
                 false,
                 atlasRespectCounts,
                 sizeInches,
@@ -319,6 +331,7 @@ namespace Deckard
                         backsInCorner,
                         GridLayoutGroup.Corner.UpperLeft,
                         TextAnchor.UpperLeft,
+                        CardRotation.AsAuthored,
                         false,
                         atlasRespectCounts,
                         sizeInches,
@@ -404,6 +417,7 @@ namespace Deckard
             bool showCardBackInCorner,
             GridLayoutGroup.Corner startCorner,
             TextAnchor childAlignment,
+            CardRotation cardRotation,
             bool showCutMarkers,
             bool respectCounts,
             Vector2 sizeInches,
@@ -424,6 +438,7 @@ namespace Deckard
                 backSprite,
                 startCorner,
                 childAlignment,
+                cardRotation,
                 showCutMarkers,
                 sizeInches,
                 bleedInches,
@@ -523,7 +538,7 @@ namespace Deckard
                 EditorUtility.ClearProgressBar();
             }
             
-            GameObject.DestroyImmediate(sheetCanvas.gameObject);
+            //GameObject.DestroyImmediate(sheetCanvas.gameObject);
         }
 
         private string GetNameForRecord(int recordIndex, int countIndex, string nameKey = null, string nameKey2 = null)
@@ -601,6 +616,7 @@ namespace Deckard
             Sprite backSprite,
             GridLayoutGroup.Corner startCorner,
             TextAnchor childAlignment,
+            CardRotation cardRotation,
             bool showCutMarkers,
             Vector2 sizeInches,
             float bleedInches,
@@ -622,6 +638,30 @@ namespace Deckard
             var padding = DeckardCanvas.InchesToUnits(bleedInches);
             var spacing = DeckardCanvas.InchesToUnits(spacingInches);
             var cardSize = showCardBleeds ? cellPrefab.TotalPrintSizeUnits : cellPrefab.ContentSizeUnits;
+            var contentSize = cellPrefab.ContentSizeUnits;
+
+            var flipAxes = false;
+            var rotationDegrees = 0f;
+            switch (cardRotation)
+            {
+                case CardRotation.RotateCW:
+                    rotationDegrees = -90f;
+                    flipAxes = true;
+                    break;
+                case CardRotation.RotateCCW:
+                    rotationDegrees = 90f;
+                    flipAxes = true;
+                    break;
+                case CardRotation.Rotate180:
+                    rotationDegrees = 180f;
+                    break;
+            }
+            
+            if (flipAxes) 
+            {
+                cardSize = new Vector2(cardSize.y, cardSize.x);
+                contentSize = new Vector2(contentSize.y, contentSize.x);
+            }
 
             sheetGrid.cellSize = cardSize;
             sheetGrid.padding = new RectOffset(padding, padding, padding, padding);
@@ -649,6 +689,7 @@ namespace Deckard
                 InstantiateCardHolder(
                     cellPrefab, 
                     sheetGrid.transform,
+                    contentSize,
                     out var holderRoot,
                     out var holderMask);
                 
@@ -659,6 +700,7 @@ namespace Deckard
                 cardInstance.RectTransform.anchorMax = center;
                 cardInstance.RectTransform.anchorMin = center;
                 cardInstance.RectTransform.anchoredPosition = Vector2.zero;
+                cardInstance.RectTransform.localRotation = Quaternion.Euler(0f, 0f, rotationDegrees);
 
                 if (showCutMarkers)
                 {
@@ -690,9 +732,6 @@ namespace Deckard
         {
             var cutMarkersPrefab = Resources.Load<RectTransform>("[CutMarkers]");
             var cutMarkersInstance = Instantiate(cutMarkersPrefab, parent, false);
-            var cardSizeUnits = cardRoot.ContentSizeUnits;
-            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
-            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
             return cutMarkersInstance;
         }
 
@@ -716,6 +755,7 @@ namespace Deckard
         private static void InstantiateCardHolder(
             DeckardCanvas cardPrefab,
             Transform parent, 
+            Vector2 size,
             out GameObject rootObject,
             out GameObject maskObject)
         {
@@ -724,14 +764,14 @@ namespace Deckard
             rootObject = new GameObject("CardHolder", typeof(RectTransform));
             var rootTransform = rootObject.GetComponent<RectTransform>();
             rootTransform.SetParent(parent, false);
-            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
-            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
+            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, size.x);
+            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, size.y);
             
             maskObject = new GameObject("Mask", typeof(RectTransform));
             var maskTransform = maskObject.GetComponent<RectTransform>();
             maskTransform.SetParent(rootTransform, false);
-            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
-            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
+            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, size.x);
+            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, size.y);
             maskObject.AddComponent<RectMask2D>();
         }
 

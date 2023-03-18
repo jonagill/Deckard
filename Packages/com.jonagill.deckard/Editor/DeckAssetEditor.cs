@@ -230,6 +230,8 @@ namespace Deckard.Editor
                         new GUIContent("Cut Markers", "Whether to render guides for where to cut out the cards on the sheet images"));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetRespectCounts"),
                         new GUIContent("Respect Counts", "Whether to render multiple copies each card based on its Count column."));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetRotation"),
+                        new GUIContent("Card Rotation", "How much to rotate the cards by when exporting."));
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("oneSheetBackBehavior"),    
                         new GUIContent("Card Backs", "How to treat card backs in the sheet images"));
 
