@@ -538,7 +538,7 @@ namespace Deckard
                 EditorUtility.ClearProgressBar();
             }
             
-            //GameObject.DestroyImmediate(sheetCanvas.gameObject);
+            GameObject.DestroyImmediate(sheetCanvas.gameObject);
         }
 
         private string GetNameForRecord(int recordIndex, int countIndex, string nameKey = null, string nameKey2 = null)
@@ -638,7 +638,6 @@ namespace Deckard
             var padding = DeckardCanvas.InchesToUnits(bleedInches);
             var spacing = DeckardCanvas.InchesToUnits(spacingInches);
             var cardSize = showCardBleeds ? cellPrefab.TotalPrintSizeUnits : cellPrefab.ContentSizeUnits;
-            var contentSize = cellPrefab.ContentSizeUnits;
 
             var flipAxes = false;
             var rotationDegrees = 0f;
@@ -660,7 +659,6 @@ namespace Deckard
             if (flipAxes) 
             {
                 cardSize = new Vector2(cardSize.y, cardSize.x);
-                contentSize = new Vector2(contentSize.y, contentSize.x);
             }
 
             sheetGrid.cellSize = cardSize;
@@ -687,9 +685,8 @@ namespace Deckard
             for (var i = 0; i < maxTotalInstances; i++)
             {
                 InstantiateCardHolder(
-                    cellPrefab, 
                     sheetGrid.transform,
-                    contentSize,
+                    cardSize,
                     out var holderRoot,
                     out var holderMask);
                 
@@ -753,26 +750,23 @@ namespace Deckard
         }
         
         private static void InstantiateCardHolder(
-            DeckardCanvas cardPrefab,
-            Transform parent, 
-            Vector2 size,
+            Transform parent,
+            Vector2 cardSize,
             out GameObject rootObject,
             out GameObject maskObject)
         {
-            var cardSizeUnits = cardPrefab.ContentSizeUnits;
-            
             rootObject = new GameObject("CardHolder", typeof(RectTransform));
             var rootTransform = rootObject.GetComponent<RectTransform>();
             rootTransform.SetParent(parent, false);
-            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, size.x);
-            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, size.y);
+            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSize.x);
+            rootTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSize.y);
             
             maskObject = new GameObject("Mask", typeof(RectTransform));
             var maskTransform = maskObject.GetComponent<RectTransform>();
             maskTransform.SetParent(rootTransform, false);
-            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, size.x);
-            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, size.y);
-            maskObject.AddComponent<RectMask2D>();
+            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSize.x);
+            maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSize.y);
+            maskObject.AddComponent<RectMask2D>();    
         }
 
         private static GameObject InstantiateSpaceFiller(Transform parent)

@@ -429,7 +429,6 @@ GameObject:
   - component: {fileID: 7491420945970171056}
   - component: {fileID: 7491420945970171059}
   - component: {fileID: 4508715850372335085}
-  - component: {fileID: 5697294295496541500}
   m_Layer: 31
   m_Name: Border
   m_TagString: Untagged
@@ -509,21 +508,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   key: Color
   collection: {fileID: 11400000, guid: 9b6b785e380555248861957ff0058630, type: 2}
---- !u!114 &5697294295496541500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7491420945970171725}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e7d6f853afea6448a3249212f9bfe65, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetComponents:
-  - {fileID: 7491420945970171059}
-  exportType: 1
 --- !u!1 &7491420946179574942
 GameObject:
   m_ObjectHideFlags: 0
@@ -598,7 +582,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   contentSizeInches: {x: 2.5, y: 3.5}
-  bleedInches: {x: 0, y: 0}
+  bleedInches: {x: 0.125, y: 0.125}
   safeZoneInches: {x: 0, y: 0}
 --- !u!1 &7491420946317882003
 GameObject:
@@ -637,7 +621,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -10, y: -10}
+  m_SizeDelta: {x: -24, y: -24}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7491420946317882006
 CanvasRenderer:
