@@ -21,6 +21,14 @@ namespace Deckard
             ShowInCorner,
             SeparateSheets
         }
+        
+        public enum CardBackType
+        {
+            [Tooltip("Use the same Sprite image for the back of every card.")]
+            Sprite,
+            [Tooltip("Use a prefab for each card back. When using the Show In Corner card back behavior, this prefab will only be evaluated for the first row of your CSV.")]
+            Prefab,
+        }
 
         public enum CardRotation 
         {
@@ -96,7 +104,10 @@ namespace Deckard
 
             public void Dispose()
             {
-                DestroyImmediate(gameObject);
+                if (gameObject != null)
+                {
+                    DestroyImmediate(gameObject);    
+                }
             }
         }
         
@@ -109,7 +120,9 @@ namespace Deckard
         [SerializeField] private CsvSheet csvSheet;
 
         [SerializeField] private DeckardCanvas cardPrefab;
+        [SerializeField] private CardBackType cardBackType = CardBackType.Sprite;
         [SerializeField] private Sprite backSprite;
+        [SerializeField] private DeckardCanvas backPrefab;
 
         [FormerlySerializedAs("prependCardCounts")] [SerializeField] private bool soloPrependCardCounts = false;
         [FormerlySerializedAs("includeBleeds")] [SerializeField] private bool soloIncludeBleeds = false;
@@ -248,26 +261,27 @@ namespace Deckard
         public void ExportPrintImages(string path)
         {
             var backsInCorner = oneSheetBackBehavior == CardBackBehavior.ShowInCorner;
-
-            ExportSheetImagesInternal(
-                path, 
-                "Print_Front", 
-                cardPrefab, 
-                true,
-                backsInCorner, 
-                GridLayoutGroup.Corner.UpperLeft,
-                TextAnchor.UpperCenter,
-                oneSheetRotation,
-                oneSheetShowCutMarkers,
-                oneSheetRespectCounts,
-                oneSheetSizeInches,
-                oneSheetBleedInches,
-                oneSheetSpacingInches);
-
-            if (oneSheetBackBehavior == CardBackBehavior.SeparateSheets && backSprite != null)
+            
+            TryInstantiateCardBackPrefab(out var cardBack);
+            using (new TempObjectScope(cardBack != null ? cardBack.gameObject : null))
             {
-                var cardBack = InstantiateCardBack(cardPrefab, backSprite);
-                using (new TempObjectScope(cardBack.gameObject))
+                ExportSheetImagesInternal(
+                    path,
+                    "Print_Front",
+                    cardPrefab,
+                    true,
+                    backsInCorner,
+                    cardBack,
+                    GridLayoutGroup.Corner.UpperLeft,
+                    TextAnchor.UpperCenter,
+                    oneSheetRotation,
+                    oneSheetShowCutMarkers,
+                    oneSheetRespectCounts,
+                    oneSheetSizeInches,
+                    oneSheetBleedInches,
+                    oneSheetSpacingInches);
+
+                if (oneSheetBackBehavior == CardBackBehavior.SeparateSheets)
                 {
                     // Perform the opposite rotation from the front so the orientation is correct when printed
                     var rotation = oneSheetRotation;
@@ -279,13 +293,14 @@ namespace Deckard
                     {
                         rotation = CardRotation.RotateCW;
                     }
-                    
+
                     ExportSheetImagesInternal(
                         path,
                         "Print_Back",
                         cardBack,
                         true,
-                        backsInCorner,
+                        false,
+                        null,
                         GridLayoutGroup.Corner.UpperRight,
                         TextAnchor.UpperCenter,
                         rotation,
@@ -313,33 +328,34 @@ namespace Deckard
                 cardPrefab.ContentSizeInches.y * atlasDimensions.y);
 
             var backsInCorner = atlasBackBehavior == CardBackBehavior.ShowInCorner;
-            
-            ExportSheetImagesInternal(
-                path, 
-                "Atlas_Front", 
-                cardPrefab, 
-                false,
-                 backsInCorner,
-                GridLayoutGroup.Corner.UpperLeft,
-                TextAnchor.UpperLeft,
-                CardRotation.AsAuthored,
-                false,
-                atlasRespectCounts,
-                sizeInches,
-                Vector2.zero,
-                0f);
-
-            if (atlasBackBehavior == CardBackBehavior.SeparateSheets && backSprite != null)
+            TryInstantiateCardBackPrefab(out var cardBack);
+            using (new TempObjectScope(cardBack != null ? cardBack.gameObject : null))
             {
-                var cardBack = InstantiateCardBack(cardPrefab, backSprite);
-                using (new TempObjectScope(cardBack.gameObject))
+                ExportSheetImagesInternal(
+                    path,
+                    "Atlas_Front",
+                    cardPrefab,
+                    false,
+                    backsInCorner,
+                    cardBack,
+                    GridLayoutGroup.Corner.UpperLeft,
+                    TextAnchor.UpperLeft,
+                    CardRotation.AsAuthored,
+                    false,
+                    atlasRespectCounts,
+                    sizeInches,
+                    Vector2.zero,
+                    0f);
+
+                if (atlasBackBehavior == CardBackBehavior.SeparateSheets)
                 {
                     ExportSheetImagesInternal(
                         path,
                         "Atlas_Back",
                         cardBack,
                         false,
-                        backsInCorner,
+                        false,
+                        null,
                         GridLayoutGroup.Corner.UpperLeft,
                         TextAnchor.UpperLeft,
                         CardRotation.AsAuthored,
@@ -426,6 +442,7 @@ namespace Deckard
             DeckardCanvas cellPrefab,
             bool showCardBleeds,
             bool showCardBackInCorner,
+            DeckardCanvas cardBackPrefab,
             GridLayoutGroup.Corner startCorner,
             TextAnchor childAlignment,
             CardRotation cardRotation,
@@ -446,7 +463,7 @@ namespace Deckard
                 cellPrefab,
                 showCardBleeds,
                 showCardBackInCorner,
-                backSprite,
+                cardBackPrefab,
                 startCorner,
                 childAlignment,
                 cardRotation,
@@ -483,6 +500,13 @@ namespace Deckard
                 
                 void ExportSheetAndClearScopes()
                 {
+                    // If we have a specific card back instance (because we're putting the card back in the corner of every sheet)
+                    // configure it using the data from the first row of the sheet
+                    if (cardBackInstance != null)
+                    {
+                        activeBehaviourScopes.Add(new ApplyCardBehaviorsScope(cardBackInstance.gameObject, exportParams, csvSheet, 0));
+                    }
+                    
                     sheetIndex++;
                     var filePath = Path.Combine(path, $"{name}_{fileLabel}_Sheet_{sheetIndex}.png");
                     var texture = sheetCanvas.Render(dpi, includeBleed: true);
@@ -611,12 +635,30 @@ namespace Deckard
 
             return exportCount;
         }
+        
+        private bool TryInstantiateCardBackPrefab(out DeckardCanvas prefab, Transform parent = null)
+        {
+            if (cardBackType == CardBackType.Sprite && backSprite != null)
+            {
+                prefab = InstantiateCardBackFromSprite(cardPrefab, backSprite, parent);
+                return true;
+            }
+            
+            if (cardBackType == CardBackType.Prefab && backPrefab != null)
+            {
+                prefab = InstantiateCardBackFromPrefab(cardPrefab, backPrefab, parent);
+                return true;
+            }
+
+            prefab = null;
+            return false;
+        }
 
         private static void GenerateGridCanvas(
             DeckardCanvas cellPrefab,
             bool showCardBleeds,
             bool showCardBackInCorner,
-            Sprite backSprite,
+            DeckardCanvas cardBackPrefab,
             GridLayoutGroup.Corner startCorner,
             TextAnchor childAlignment,
             CardRotation cardRotation,
@@ -632,6 +674,8 @@ namespace Deckard
             sheetCanvas.ContentSizeInches = sizeInches;
             sheetCanvas.BleedInches = Vector2.zero; // We will manually configure bleed via padding 
             sheetCanvas.SafeZoneInches = Vector2.zero;
+
+            cardBackInstance = null;
 
             var sheetBackground = sheetCanvas.gameObject.AddComponent<Image>();
             sheetBackground.color = Color.white;
@@ -689,29 +733,35 @@ namespace Deckard
                     cellSize,
                     out var holderRoot,
                     out var holderMask);
+
+                DeckardCanvas cellInstance;
+                if (showCardBackInCorner && 
+                    cardBackPrefab != null &&
+                    i == maxTotalInstances - 1 )
+                {
+                    // Spawn the card back in the final cell of the grid
+                    cellInstance = Instantiate(cardBackPrefab, holderMask.transform, false);
+                    cardBackInstance = cellInstance;
+                }
+                else
+                {
+                    // Spawn a card instance in the cell
+                    cellInstance = Instantiate(cellPrefab, holderMask.transform, false);
+                    cardInstances.Add(cellInstance);
+                }
                 
-                var cardInstance = Instantiate(cellPrefab, holderMask.transform, false);
                 
                 // Center the card in the middle of the mask
                 var center = Vector2.one * .5f;
-                cardInstance.RectTransform.anchorMax = center;
-                cardInstance.RectTransform.anchorMin = center;
-                cardInstance.RectTransform.anchoredPosition = Vector2.zero;
-                cardInstance.RectTransform.localRotation = Quaternion.Euler(0f, 0f, rotationDegrees);
+                cellInstance.RectTransform.anchorMax = center;
+                cellInstance.RectTransform.anchorMin = center;
+                cellInstance.RectTransform.anchoredPosition = Vector2.zero;
+                cellInstance.RectTransform.localRotation = Quaternion.Euler(0f, 0f, rotationDegrees);
 
                 if (showCutMarkers)
                 {
                     InstantiateCutMarkers(contentSize, holderRoot.transform);
                 }
-                
-                cardInstances.Add(cardInstance);
-            }
-
-            // Spawn a card back instance if we want to keep a copy of it in the corner
-            cardBackInstance = null;
-            if (showCardBackInCorner)
-            {
-                cardBackInstance = InstantiateCardBackFromSprite(cellPrefab, backSprite, sheetGrid.transform);
             }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(sheetCanvas.RectTransform);
@@ -728,7 +778,25 @@ namespace Deckard
             return cutMarkersInstance;
         }
 
-        private static DeckardCanvas InstantiateCardBack(DeckardCanvas cardPrefab, Sprite backSprite, Transform parent = null)
+        private static DeckardCanvas InstantiateCardBackFromPrefab(
+            DeckardCanvas cardPrefab, 
+            DeckardCanvas backPrefab,
+            Transform parent = null)
+        {
+            if (cardPrefab == null) return null;
+            if (backPrefab == null) return null;
+
+            var backInstance = Instantiate(backPrefab, parent);
+            backInstance.ContentSizeInches = cardPrefab.ContentSizeInches;
+            backInstance.BleedInches = cardPrefab.BleedInches;
+
+            return backInstance;
+        }
+
+        private static DeckardCanvas InstantiateCardBackFromSprite(
+            DeckardCanvas cardPrefab, 
+            Sprite backSprite, 
+            Transform parent = null)
         {
             if (cardPrefab == null) return null;
             var backPrefab = new GameObject("CardBack", typeof(Canvas));

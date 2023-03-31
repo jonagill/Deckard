@@ -203,15 +203,20 @@ MonoBehaviour:
       - 1
   cardPrefab: {fileID: 8323018441011292592, guid: b478bd518ba5ab344ab269b3be3a6775,
     type: 3}
+  cardBackType: 0
   backSprite: {fileID: 0}
-  prependCardCounts: 1
-  includeBleeds: 0
+  backPrefab: {fileID: 0}
+  soloPrependCardCounts: 1
+  soloIncludeBleeds: 0
   oneSheetSizeInches: {x: 8.5, y: 11}
-  oneSheetBleedInches: 0.25
-  oneSheetSpacingInches: 0.125
+  oneSheetBleedInches: {x: 0.125, y: 0.75}
+  oneSheetSpacingInches: 0
   oneSheetShowCutMarkers: 1
+  oneSheetRespectCounts: 1
+  oneSheetRotation: 1
   oneSheetBackBehavior: 2
   atlasDimensions: {x: 7, y: 5}
+  atlasRespectCounts: 0
   atlasBackBehavior: 1
   cardNameKey: Suit
   cardNameKey2: Value

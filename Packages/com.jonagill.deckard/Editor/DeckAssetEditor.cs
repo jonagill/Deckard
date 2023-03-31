@@ -115,7 +115,18 @@ namespace Deckard.Editor
                 using (new EditorGUILayout.VerticalScope("box"))
                 {
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("cardPrefab"), new GUIContent("Card Prefab", "The prefab to use as the base for cards in this deck"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("backSprite"), new GUIContent("Card Back", "The sprite to use as the card backs when exporting using options that include backs"));
+
+                    var backTypeProperty = serializedObject.FindProperty("cardBackType");
+                    EditorGUILayout.PropertyField(backTypeProperty, new GUIContent("Card Back Type"));
+
+                    if (backTypeProperty.intValue == (int)DeckAsset.CardBackType.Sprite)
+                    {
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("backSprite"), new GUIContent("Card Back", "The sprite to use as the card backs when exporting using options that include backs"));    
+                    }
+                    else
+                    {
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("backPrefab"), new GUIContent("Card Back", "The prefab to use as the card backs when exporting using options that include backs"));   
+                    }
 
                     EditorGUILayout.PropertyField(serializedObject.FindProperty("dpi"), new GUIContent("DPI", "The resolution of your exported card files in dots per inch / pixels per inch"));
                 }
