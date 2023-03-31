@@ -456,8 +456,7 @@ namespace Deckard
                 spacingInches,
                 out var sheetCanvas,
                 out var cardInstances,
-                out var cardBackInstance,
-                out var spaceFillerInstances
+                out var cardBackInstance
             );
 
             if (cardInstances.Count == 0)
@@ -526,7 +525,6 @@ namespace Deckard
                 // export the sheet one last time
                 if (activeBehaviourScopes.Count > 0)
                 {
-                    var disabledInstances = maxCardsPerPage - nextCardInstanceIndex;
                     // Disable all the card instances that don't have records assigned
                     while (nextCardInstanceIndex < maxCardsPerPage)
                     {
@@ -534,12 +532,6 @@ namespace Deckard
                         nextCardInstanceIndex++;
                     }
 
-                    for (var i = 0; i < disabledInstances && i < spaceFillerInstances.Count; i++)
-                    {
-                        // Enable filler instances to keep the card back in the bottom corner
-                        spaceFillerInstances[i].SetActive(true);
-                    }
-                    
                     // Export the sheet one last time
                     ExportSheetAndClearScopes();
                 }
@@ -634,8 +626,7 @@ namespace Deckard
             float spacingInches,
             out DeckardCanvas sheetCanvas, 
             out List<DeckardCanvas> cardInstances,
-            out DeckardCanvas cardBackInstance,
-            out List<GameObject> spaceFillerInstances)
+            out DeckardCanvas cardBackInstance)
         {
             sheetCanvas = new GameObject("SheetInstance").AddComponent<DeckardCanvas>();
             sheetCanvas.ContentSizeInches = sizeInches;
@@ -690,6 +681,7 @@ namespace Deckard
             var maxTotalInstances = maxHorizontalInstances * maxVerticalInstances;
             if (showCardBackInCorner)
             {
+                // Save space for the card back
                 maxTotalInstances--;
             }
 
@@ -718,19 +710,11 @@ namespace Deckard
                 cardInstances.Add(cardInstance);
             }
 
-            // If we want to put the card back in the corner of the sheet,
-            // add a bunch of disabled filler spaces, then add the card back
+            // Spawn a card back instance if we want to keep a copy of it in the corner
             cardBackInstance = null;
-            spaceFillerInstances = new List<GameObject>();
             if (showCardBackInCorner)
             {
-                for (var i = 0; i < maxTotalInstances; i++)
-                {
-                    var filler = InstantiateSpaceFiller(sheetGrid.transform);
-                    spaceFillerInstances.Add(filler);
-                    filler.SetActive(false);
-                }
-                cardBackInstance = InstantiateCardBack(cellPrefab, backSprite, sheetGrid.transform);
+                cardBackInstance = InstantiateCardBackFromSprite(cellPrefab, backSprite, sheetGrid.transform);
             }
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(sheetCanvas.RectTransform);
@@ -783,13 +767,6 @@ namespace Deckard
             maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSize.x);
             maskTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSize.y);
             maskObject.AddComponent<RectMask2D>();    
-        }
-
-        private static GameObject InstantiateSpaceFiller(Transform parent)
-        {
-            var filler = new GameObject("Filler", typeof(RectTransform));
-            filler.transform.SetParent(parent);
-            return filler;
         }
     }
 }
