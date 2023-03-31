@@ -639,7 +639,8 @@ namespace Deckard
             var sheetGrid = sheetCanvas.gameObject.AddComponent<GridLayoutGroup>();
             var padding = DeckardCanvas.InchesToUnits(bleedInches);
             var spacing = DeckardCanvas.InchesToUnits(spacingInches);
-            var cardSize = showCardBleeds ? cellPrefab.TotalPrintSizeUnits : cellPrefab.ContentSizeUnits;
+            var cellSize = showCardBleeds ? cellPrefab.TotalPrintSizeUnits : cellPrefab.ContentSizeUnits;
+            var contentSize = cellPrefab.ContentSizeUnits;
 
             var flipAxes = false;
             var rotationDegrees = 0f;
@@ -660,10 +661,11 @@ namespace Deckard
             
             if (flipAxes) 
             {
-                cardSize = new Vector2(cardSize.y, cardSize.x);
+                cellSize = new Vector2(cellSize.y, cellSize.x);
+                contentSize = new Vector2(contentSize.y, contentSize.x);
             }
 
-            sheetGrid.cellSize = cardSize;
+            sheetGrid.cellSize = cellSize;
             sheetGrid.padding = new RectOffset((int) padding.x, (int) padding.x, (int) padding.y, (int) padding.y);
             sheetGrid.spacing = Vector2.one * spacing;
             sheetGrid.startCorner = startCorner;
@@ -676,20 +678,15 @@ namespace Deckard
             var availableWidth = sheetRect.width - (padding.x * 2);
             var availableHeight = sheetRect.height - (padding.y * 2);
             
-            var maxHorizontalInstances = Mathf.FloorToInt((availableWidth + spacing) / (cardSize.x + spacing));
-            var maxVerticalInstances = Mathf.FloorToInt((availableHeight + spacing) / (cardSize.y + spacing));
+            var maxHorizontalInstances = Mathf.FloorToInt((availableWidth + spacing) / (cellSize.x + spacing));
+            var maxVerticalInstances = Mathf.FloorToInt((availableHeight + spacing) / (cellSize.y + spacing));
             var maxTotalInstances = maxHorizontalInstances * maxVerticalInstances;
-            if (showCardBackInCorner)
-            {
-                // Save space for the card back
-                maxTotalInstances--;
-            }
 
             for (var i = 0; i < maxTotalInstances; i++)
             {
                 InstantiateCardHolder(
                     sheetGrid.transform,
-                    cardSize,
+                    cellSize,
                     out var holderRoot,
                     out var holderMask);
                 
@@ -704,7 +701,7 @@ namespace Deckard
 
                 if (showCutMarkers)
                 {
-                    InstantiateCutMarkers(cardInstance, holderRoot.transform);
+                    InstantiateCutMarkers(contentSize, holderRoot.transform);
                 }
                 
                 cardInstances.Add(cardInstance);
@@ -720,14 +717,13 @@ namespace Deckard
             LayoutRebuilder.ForceRebuildLayoutImmediate(sheetCanvas.RectTransform);
         }
 
-        private static RectTransform InstantiateCutMarkers(DeckardCanvas cardRoot, Transform parent)
+        private static RectTransform InstantiateCutMarkers(Vector2 contentSizeUnits, Transform parent)
         {
             var cutMarkersPrefab = Resources.Load<RectTransform>("[CutMarkers]");
             var cutMarkersInstance = Instantiate(cutMarkersPrefab, parent, false);
             
-            var cardSizeUnits = cardRoot.ContentSizeUnits;
-            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardSizeUnits.x);
-            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cardSizeUnits.y);
+            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, contentSizeUnits.x);
+            cutMarkersInstance.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, contentSizeUnits.y);
             
             return cutMarkersInstance;
         }
