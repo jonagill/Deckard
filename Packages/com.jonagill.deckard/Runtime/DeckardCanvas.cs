@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -159,6 +155,12 @@ namespace Deckard
                     EnforceCorrectConfiguration();
                 }
             }
+        }
+
+        private void Awake()
+        {
+            // Snap the RectTransform to its current size
+            EnforceCorrectConfiguration();
         }
 
         private void Start()
