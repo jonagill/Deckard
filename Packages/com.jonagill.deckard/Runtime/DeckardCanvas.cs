@@ -20,9 +20,9 @@ namespace Deckard
         private const float CAMERA_FAR_PLANE = .1f;
         private const float CAMERA_RENDER_DISTANCE = .05f;
 
-        public static int InchesToUnits(float inches)
+        public static float InchesToUnits(float inches)
         {
-            return (int) (inches * UNITS_PER_INCH);
+            return (inches * UNITS_PER_INCH);
         }
 
         public static Vector2 InchesToUnits(Vector2 inches)

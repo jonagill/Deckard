@@ -681,7 +681,7 @@ namespace Deckard
             sheetBackground.color = Color.white;
             
             var sheetGrid = sheetCanvas.gameObject.AddComponent<GridLayoutGroup>();
-            var padding = DeckardCanvas.InchesToUnits(bleedInches);
+            var padding = new Vector2Int((int) DeckardCanvas.InchesToUnits(bleedInches.x), (int) DeckardCanvas.InchesToUnits(bleedInches.y));
             var spacing = DeckardCanvas.InchesToUnits(spacingInches);
             var cellSize = showCardBleeds ? cellPrefab.TotalPrintSizeUnits : cellPrefab.ContentSizeUnits;
             var contentSize = cellPrefab.ContentSizeUnits;
@@ -710,7 +710,7 @@ namespace Deckard
             }
 
             sheetGrid.cellSize = cellSize;
-            sheetGrid.padding = new RectOffset((int) padding.x, (int) padding.x, (int) padding.y, (int) padding.y);
+            sheetGrid.padding = new RectOffset(padding.x, padding.x, padding.y, padding.y);
             sheetGrid.spacing = Vector2.one * spacing;
             sheetGrid.startCorner = startCorner;
             sheetGrid.startAxis = GridLayoutGroup.Axis.Horizontal;
@@ -722,8 +722,11 @@ namespace Deckard
             var availableWidth = sheetRect.width - (padding.x * 2);
             var availableHeight = sheetRect.height - (padding.y * 2);
             
-            var maxHorizontalInstances = Mathf.FloorToInt((availableWidth + spacing) / (cellSize.x + spacing));
-            var maxVerticalInstances = Mathf.FloorToInt((availableHeight + spacing) / (cellSize.y + spacing));
+            // Add a bonus unit to the available width and height when calculating available instances
+            // to make up for the grid padding not being a floating point value, which can require
+            // some additional finnagling on the bleed sizes to fit an exact print template
+            var maxHorizontalInstances = Mathf.FloorToInt((availableWidth + spacing + 1) / (cellSize.x + spacing));
+            var maxVerticalInstances = Mathf.FloorToInt((availableHeight + spacing + 1) / (cellSize.y + spacing));
             var maxTotalInstances = maxHorizontalInstances * maxVerticalInstances;
 
             for (var i = 0; i < maxTotalInstances; i++)
