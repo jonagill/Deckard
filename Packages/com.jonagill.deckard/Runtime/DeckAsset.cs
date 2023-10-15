@@ -294,21 +294,28 @@ namespace Deckard
                         rotation = CardRotation.RotateCW;
                     }
 
-                    ExportSheetImagesInternal(
-                        path,
-                        "Print_Back",
-                        cardBack,
-                        true,
-                        false,
-                        null,
-                        GridLayoutGroup.Corner.UpperRight,
-                        TextAnchor.UpperCenter,
-                        rotation,
-                        oneSheetShowCutMarkers,
-                        oneSheetRespectCounts,
-                        oneSheetSizeInches,
-                        oneSheetBleedInches,
-                        oneSheetSpacingInches);
+                    if (cardBack != null)
+                    {
+                        ExportSheetImagesInternal(
+                            path,
+                            "Print_Back",
+                            cardBack,
+                            true,
+                            false,
+                            null,
+                            GridLayoutGroup.Corner.UpperRight,
+                            TextAnchor.UpperCenter,
+                            rotation,
+                            oneSheetShowCutMarkers,
+                            oneSheetRespectCounts,
+                            oneSheetSizeInches,
+                            oneSheetBleedInches,
+                            oneSheetSpacingInches);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"No card back specified!");
+                    }
                 }
             }
 
@@ -349,21 +356,28 @@ namespace Deckard
 
                 if (atlasBackBehavior == CardBackBehavior.SeparateSheets)
                 {
-                    ExportSheetImagesInternal(
-                        path,
-                        "Atlas_Back",
-                        cardBack,
-                        false,
-                        false,
-                        null,
-                        GridLayoutGroup.Corner.UpperLeft,
-                        TextAnchor.UpperLeft,
-                        CardRotation.AsAuthored,
-                        false,
-                        atlasRespectCounts,
-                        sizeInches,
-                        Vector2.zero,
-                        0);
+                    if (cardBack != null)
+                    {
+                        ExportSheetImagesInternal(
+                            path,
+                            "Atlas_Back",
+                            cardBack,
+                            false,
+                            false,
+                            null,
+                            GridLayoutGroup.Corner.UpperLeft,
+                            TextAnchor.UpperLeft,
+                            CardRotation.AsAuthored,
+                            false,
+                            atlasRespectCounts,
+                            sizeInches,
+                            Vector2.zero,
+                            0);                        
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"No card back specified!");
+                    }
                 }
             }
 
