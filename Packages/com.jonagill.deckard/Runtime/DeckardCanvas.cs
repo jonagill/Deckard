@@ -246,6 +246,11 @@ namespace Deckard
 
         private bool EnforceCorrectConfiguration()
         {
+            if (DeckardHelpers.IsPartOfReadOnlyPackage(this))
+            {
+                return false;
+            }
+            
             var isDirty = false;
             
             isDirty |= ForceVector2Range(ref contentSizeInches, Vector2.zero, Vector2.positiveInfinity);
@@ -356,6 +361,11 @@ namespace Deckard
 
         private void OnValidate()
         {
+            if (DeckardHelpers.IsPartOfReadOnlyPackage(this))
+            {
+                return;
+            }
+            
             EditorApplication.delayCall += (() =>
             {
                 if (this == null)
