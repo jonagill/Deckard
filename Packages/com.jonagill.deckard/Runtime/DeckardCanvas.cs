@@ -86,7 +86,6 @@ namespace Deckard
         }
 
         [FormerlySerializedAs("sizeInches")]
-        [FormerlySerializedAs("contentSizeInches")]
         [SerializeField, Tooltip("The desired size of the final printed card")] 
         private Vector2 contentSizeInches;
         /// <summary>
