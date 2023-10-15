@@ -18,6 +18,7 @@ namespace Deckard
         [Serializable]
         public class SpriteEntry
         {
+            [Delayed]
             public string Key;
             public Sprite Sprite;
 

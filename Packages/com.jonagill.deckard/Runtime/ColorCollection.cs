@@ -18,6 +18,7 @@ namespace Deckard
         [Serializable]
         public class ColorEntry
         {
+            [Delayed]
             public string Key;
             public Color Color = UnityEngine.Color.white;
 
