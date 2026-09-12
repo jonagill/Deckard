@@ -7,6 +7,8 @@ namespace Deckard.Data
     public class CsvSprite : CsvDataBehaviour
     {
         [SerializeField] private SpriteCollection spriteCollection;
+        [Tooltip("If an AspectRatioFitter is on the same component, sets the target aspect ratio to the aspect of the assigned sprite.")]
+        [SerializeField] private bool setAspectRatio = true;
 
         private Sprite prevSprite;
         private bool prevEnabled;
@@ -29,6 +31,15 @@ namespace Deckard.Data
                         {
                             target.sprite = sprite;
                             target.enabled = true;
+
+                            if (setAspectRatio && TryGetComponent<AspectRatioFitter>(out var aspectRatioFitter))
+                            {
+                                var textureRect = sprite.textureRect;
+                                if (textureRect.height > 0f)
+                                {
+                                    aspectRatioFitter.aspectRatio = sprite.textureRect.width / sprite.textureRect.height;
+                                }
+                            }
                         }
                         else
                         {
