@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,13 +33,9 @@ namespace Deckard.Data
                             target.sprite = sprite;
                             target.enabled = true;
 
-                            if (setAspectRatio && TryGetComponent<AspectRatioFitter>(out var aspectRatioFitter))
+                            if (setAspectRatio)
                             {
-                                var textureRect = sprite.textureRect;
-                                if (textureRect.height > 0f)
-                                {
-                                    aspectRatioFitter.aspectRatio = sprite.textureRect.width / sprite.textureRect.height;
-                                }
+                                ApplyAspectRatio(target);
                             }
                         }
                         else
@@ -62,6 +59,26 @@ namespace Deckard.Data
             {
                 target.sprite = prevSprite;
                 target.enabled = prevEnabled;
+            }
+        }
+
+        private void ApplyAspectRatio(Image target)
+        {
+            if (target.sprite != null && TryGetComponent<AspectRatioFitter>(out var aspectRatioFitter))
+            {
+                var textureRect = target.sprite.textureRect;
+                if (textureRect.height > 0f)
+                {
+                    aspectRatioFitter.aspectRatio = textureRect.width / textureRect.height;
+                }
+            }
+        }
+
+        private void OnValidate()
+        {
+            if (setAspectRatio && TryGetComponent<Image>(out var image))
+            {
+                ApplyAspectRatio(image);
             }
         }
     }
