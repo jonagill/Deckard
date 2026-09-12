@@ -13,8 +13,15 @@ Deckard is designed to be used as an editor tool only, and is not optimized or d
 * Export cards as individual files, print-and-play sheets, and sprite atlases for digital prototyping platforms (Screentop.gg, Tabletop Playground, etc.)
 
 ## Installation
-We recommend you install Deckard via [OpenUPM](https://openupm.com/packages/com.jonagill.deckard/). Per OpenUPM's documentation:
 
+### Install via Git
+1. Open Window/Package Manager
+2. Click the + button
+3. Select Add Package From Git URL
+4. Paste `https://github.com/jonagill/Deckard.git?path=Packages/com.jonagill.deckard` into the URL field
+5. Click Install
+
+### Installation via [OpenUPM](https://openupm.com/packages/com.jonagill.deckard/)
 1. Open `Edit/Project Settings/Package Manager`
 2. Add a new Scoped Registry (or edit the existing OpenUPM entry) to read:
     * Name: `package.openupm.com`
