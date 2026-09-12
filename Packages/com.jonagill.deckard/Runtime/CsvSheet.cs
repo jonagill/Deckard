@@ -57,6 +57,9 @@ namespace Deckard.Data
             
             // Split on any separators that are not enclosed in quotes
             Regex splitterRegex = new Regex($"{fieldSeparator}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+            Regex trimStartRegex = new Regex("^[\"\'\t]");
+            Regex trimEndRegex = new Regex("[\"\'\t]$");
+            Regex doubleQuoteRegex = new Regex("\"\"");
             
             var rows = input.Split(rowSeparator);
             for (var i = 0; i < rows.Length; i++)
@@ -68,9 +71,13 @@ namespace Deckard.Data
                     
                     // Remove any trailing whitespace
                     field = field.TrimEnd();
-                    
+
                     // Remove quotes that might be wrapping the field
-                    field  = field.Trim('\'', '\"', '\t');
+                    field = trimStartRegex.Replace(field, string.Empty);
+                    field = trimEndRegex.Replace(field, string.Empty);
+                    
+                    // Swap doubled CSV quotes for single quotes
+                    field = doubleQuoteRegex.Replace(field, "\"");
                     
                     fields[j] = field;
                 }
